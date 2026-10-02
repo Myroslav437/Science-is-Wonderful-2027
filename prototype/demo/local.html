@@ -1,0 +1,2399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+/* same small reset the hosting platform provides */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f8f8f6}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<title>How Does a Robot See You?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Baloo+2:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a dark control console on top; three columns read left to right:
+   (1) what the robot senses | (2) the picture it builds + "what if" | (3) why it thinks so + what it will never guess.
+   Fits one 16:9 screen (1rem = 20px at 1080p); stacks and scrolls on narrow screens. */
+:root{
+  --font-display:"Baloo 2","Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  --font-body:"Atkinson Hyperlegible","Segoe UI",Verdana,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --font-emoji:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;
+
+  /* type ramp: read = what a visitor should read; aux = labels; min = the smallest anything gets */
+  --fs-read:max(1rem, 14px);
+  --fs-aux:max(.85rem, 12.5px);
+  --fs-min:max(.75rem, 12px);
+
+  /* paper + ink */
+  --bg:#edf2f8;
+  --grid:rgba(47,125,225,.07);
+  --surface:#ffffff;
+  --surface-2:#f4f7fb;
+  --sunk:#e2e9f2;
+  --ink:#13233b;
+  --ink-2:#3f5069;
+  --ink-3:#5d6d85;
+  --line:#d2dbe7;
+  --line-2:#b4c1d3;
+  --scrim:rgba(13,24,40,.62);
+
+  /* control console (dark in both themes) */
+  --console:#14243c;
+  --console-2:#1d3150;
+  --console-3:#2b4369;
+  --console-ink:#f1f5fb;
+  --console-ink-2:#a9b9cf;
+  --track-off:#0a1424;
+  --knob-1:#ffffff;
+  --knob-2:#d3dbe6;
+
+  /* the two senses: the core colour code */
+  --eyes:#2f7de1; --eyes-ink:#1a5db3; --eyes-soft:#dce8fb; --eyes-glow:rgba(47,125,225,.36); --on-eyes:#ffffff;
+  --ears:#f08a24; --ears-ink:#8f4600; --ears-soft:#fde8d3; --ears-glow:rgba(240,138,36,.38); --on-ears:#2a1600;
+  --ears-z1:rgba(240,138,36,.12); --ears-z2:rgba(240,138,36,.24); --ears-z3:rgba(240,138,36,.40);
+
+  /* certainty scale (separate from the senses) */
+  --sure:#17804a; --sure-ink:#ffffff; --think-bg:#d3eedd; --cert-ink:#0f5c36; --unk:#6f7f96;
+
+  /* highlight, trouble, live */
+  --hl:#ffcc2e; --hl-ink:#2a2100;
+  --trouble:#c9d3e0;
+  --fog:rgba(205,214,226,.82);
+  --live:#d42a3f; --on-live:#ffffff;
+
+  /* avatar drawing */
+  --av-paper:#f8fafd; --av-grid:rgba(47,125,225,.10);
+  --av-line:#15243b; --av-ink:#15243b; --av-mark:#15243b; --av-face:#ffffff; --av-limb:#61728d; --av-shadow:rgba(19,35,59,.15); --av-unk:#7d8ca2;
+  --av-disc:#edf2f8; --av-disc-line:#c3cfdf;
+
+  /* robot dog */
+  --dog-body:#f6f8fc; --dog-ear:#dfe6f0; --dog-line:#14243c; --dog-visor:#1c2b42; --dog-joint:#8a98ae; --dog-lid:#b6c3d4;
+  --muff:#7e8ca3; --muff-band:#56657d; --iris-a:#33445f; --iris-b:#43567a; --iris-ring:#8a98ae;
+
+  /* promises panel */
+  --never-bg:#14243c; --never-line:#14243c; --never-ink:#f1f5fb; --never-ink-2:#c3d0e2; --never-slash:#ff7468;
+
+  /* overlays */
+  --cap-bg:rgba(10,19,33,.92); --cap-ink:#ffffff;
+  --focus:#13233b;
+
+  /* keepsake print: light paper in both themes */
+  --print-paper:#ffffff; --print-ink:#13233b; --print-ink-2:#4a5a72; --print-line:#d6dee9; --print-grid:rgba(47,125,225,.09);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1726; --grid:rgba(120,170,240,.055); --surface:#13223a; --surface-2:#172a45; --sunk:#0e1c31;
+    --ink:#e8eef7; --ink-2:#b6c4d7; --ink-3:#8fa1ba; --line:#243958; --line-2:#3a5680; --scrim:rgba(2,6,14,.72);
+    --console:#081220; --console-2:#13233c; --console-3:#223a5d; --console-ink:#f1f5fb; --console-ink-2:#a3b4cb; --track-off:#050c17;
+    --knob-1:#ffffff; --knob-2:#cfd8e4;
+    --eyes:#4a93f1; --eyes-ink:#93c0f9; --eyes-soft:#14315a; --eyes-glow:rgba(74,147,241,.45); --on-eyes:#03122a;
+    --ears:#f69a3a; --ears-ink:#f9bb7b; --ears-soft:#41280e; --ears-glow:rgba(246,154,58,.45); --on-ears:#2a1600;
+    --ears-z1:rgba(246,154,58,.10); --ears-z2:rgba(246,154,58,.20); --ears-z3:rgba(246,154,58,.36);
+    --sure:#22975a; --sure-ink:#ffffff; --think-bg:#123827; --cert-ink:#8fe0b3; --unk:#8a9cb6;
+    --hl:#ffd23f; --hl-ink:#2a2100; --trouble:#5d7192; --fog:rgba(170,184,204,.78);
+    --live:#ff6b7b; --on-live:#2a0008;
+    --av-paper:#14243b; --av-grid:rgba(120,170,240,.09);
+    --av-line:#5d7397; --av-ink:#15243b; --av-mark:#c9d6ea; --av-face:#e2e9f3; --av-limb:#8394b0; --av-shadow:rgba(0,0,0,.42); --av-unk:#8296b4;
+    --av-disc:#1d3150; --av-disc-line:#3a557d;
+    --dog-body:#dbe4f0; --dog-ear:#b9c6d8; --dog-line:#8aa0c2; --dog-visor:#15233a; --dog-joint:#7a8aa5; --dog-lid:#9eafc6;
+    --muff:#6d7d97; --muff-band:#4a5a74; --iris-a:#2a3a55; --iris-b:#3a4d70; --iris-ring:#7a8aa5;
+    --never-bg:#060e1a; --never-line:#33507a; --never-ink:#f1f5fb; --never-ink-2:#c0cde0; --never-slash:#ff8679;
+    --cap-bg:rgba(3,8,16,.92); --cap-ink:#ffffff; --focus:#ffd23f;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1726; --grid:rgba(120,170,240,.055); --surface:#13223a; --surface-2:#172a45; --sunk:#0e1c31;
+  --ink:#e8eef7; --ink-2:#b6c4d7; --ink-3:#8fa1ba; --line:#243958; --line-2:#3a5680; --scrim:rgba(2,6,14,.72);
+  --console:#081220; --console-2:#13233c; --console-3:#223a5d; --console-ink:#f1f5fb; --console-ink-2:#a3b4cb; --track-off:#050c17;
+  --knob-1:#ffffff; --knob-2:#cfd8e4;
+  --eyes:#4a93f1; --eyes-ink:#93c0f9; --eyes-soft:#14315a; --eyes-glow:rgba(74,147,241,.45); --on-eyes:#03122a;
+  --ears:#f69a3a; --ears-ink:#f9bb7b; --ears-soft:#41280e; --ears-glow:rgba(246,154,58,.45); --on-ears:#2a1600;
+  --ears-z1:rgba(246,154,58,.10); --ears-z2:rgba(246,154,58,.20); --ears-z3:rgba(246,154,58,.36);
+  --sure:#22975a; --sure-ink:#ffffff; --think-bg:#123827; --cert-ink:#8fe0b3; --unk:#8a9cb6;
+  --hl:#ffd23f; --hl-ink:#2a2100; --trouble:#5d7192; --fog:rgba(170,184,204,.78);
+  --live:#ff6b7b; --on-live:#2a0008;
+  --av-paper:#14243b; --av-grid:rgba(120,170,240,.09);
+  --av-line:#5d7397; --av-ink:#15243b; --av-mark:#c9d6ea; --av-face:#e2e9f3; --av-limb:#8394b0; --av-shadow:rgba(0,0,0,.42); --av-unk:#8296b4;
+  --av-disc:#1d3150; --av-disc-line:#3a557d;
+  --dog-body:#dbe4f0; --dog-ear:#b9c6d8; --dog-line:#8aa0c2; --dog-visor:#15233a; --dog-joint:#7a8aa5; --dog-lid:#9eafc6;
+  --muff:#6d7d97; --muff-band:#4a5a74; --iris-a:#2a3a55; --iris-b:#3a4d70; --iris-ring:#7a8aa5;
+  --never-bg:#060e1a; --never-line:#33507a; --never-ink:#f1f5fb; --never-ink-2:#c0cde0; --never-slash:#ff8679;
+  --cap-bg:rgba(3,8,16,.92); --cap-ink:#ffffff; --focus:#ffd23f;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{font-size:clamp(12px, min(1.0417vw, 1.852vh), 40px); height:100%}
+body{
+  height:100%; margin:0; color:var(--ink); background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:1.5rem 1.5rem;
+  font-family:var(--font-body); font-size:var(--fs-read); line-height:1.35;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+button,select,input{font:inherit; color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus); outline-offset:3px; border-radius:.3rem}
+.deck :focus-visible, .endcard :focus-visible, .never :focus-visible{outline-color:var(--hl)}
+svg{overflow:visible}
+img{max-width:100%}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* ---------- app frame ---------- */
+.app{
+  height:100%; max-width:200rem; margin-inline:auto;
+  display:grid; grid-template-rows:auto auto minmax(0,1fr) auto; gap:.6rem;
+  padding-top:.6rem; padding-bottom:calc(.45rem + var(--cap-reserve, 0px)); padding-inline:max(16px, 1.2rem);
+}
+.app.no-chrome{grid-template-rows:auto minmax(0,1fr) auto}
+.app.no-chrome .deck{display:none}
+.app.scroll{height:auto; min-height:100%}
+
+/* ---------- header ---------- */
+.top{display:flex; align-items:center; gap:.9rem; min-height:2.3rem; min-width:0}
+.brand{display:flex; align-items:center; gap:.65rem; margin-right:auto; min-width:0}
+.app.has-stage .brand{visibility:hidden}
+.mark{width:2.3rem; height:2.3rem; flex:none}
+.brand h1{margin:0; font-family:var(--font-display); font-weight:800; font-size:1.85rem; line-height:1; letter-spacing:-.01em; text-wrap:balance}
+.proto{font:700 var(--fs-min) var(--font-mono); text-transform:uppercase; letter-spacing:.06em; color:var(--ink-2); border:1.5px solid var(--line-2); border-radius:.3rem; padding:.08rem .4rem; white-space:nowrap}
+.live-badge{display:inline-flex; align-items:center; gap:.45rem; padding:.28rem .8rem .28rem .6rem; border-radius:99px; background:var(--live); color:var(--on-live); font-weight:700; font-size:var(--fs-aux); line-height:1.1; white-space:nowrap}
+.live-badge i{width:.62rem; height:.62rem; border-radius:50%; background:currentColor; animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.status{display:flex; align-items:center; gap:.45rem; flex-wrap:wrap}
+.st{display:inline-flex; align-items:center; gap:.35rem; padding:.22rem .65rem .22rem .45rem; border-radius:99px; border:2px solid; font-weight:700; font-size:var(--fs-aux); line-height:1.1; white-space:nowrap}
+.st svg{width:1.2rem; height:1.2rem}
+.st em{font:800 var(--fs-min) var(--font-mono); font-style:normal; letter-spacing:.04em}
+.st-eyes{background:var(--eyes); border-color:var(--eyes); color:var(--on-eyes)}
+.st-ears{background:var(--ears); border-color:var(--ears); color:var(--on-ears)}
+.st.off{background:transparent; color:var(--ink-2); border-color:var(--line-2); border-style:dashed}
+.st-cond{display:inline-flex; align-items:center; gap:.3rem; padding:.2rem .55rem; border-radius:.4rem; font-weight:700; font-size:var(--fs-aux); color:var(--ink);
+  background:repeating-linear-gradient(135deg, var(--trouble) 0 .3rem, transparent .3rem .6rem); border:1.5px solid var(--line-2)}
+.st-cond svg{width:1.05rem; height:1.05rem}
+.st-vis{font-weight:700; font-size:var(--fs-aux); color:var(--ink-2); padding-left:.2rem}
+.st-time{font:700 var(--fs-aux) var(--font-mono); color:var(--ink); font-variant-numeric:tabular-nums}
+.st-load{font-size:var(--fs-aux); color:var(--ink-2)}
+/* the status pills repeat the console; they are only needed when the console is hidden (video) */
+.app:not(.no-chrome) .status .st, .app:not(.no-chrome) .status .st-cond, .app:not(.no-chrome) .status .st-vis, .app:not(.no-chrome) .status .st-time{display:none}
+.app.live .status .st-vis, .app.live .status .st-time, .app.live .status .st-cond{display:none}
+.lang{display:inline-flex; border:2px solid var(--ink); border-radius:.55rem; overflow:hidden; flex:none}
+.lang button{border:0; background:transparent; color:var(--ink); font:700 var(--fs-min) var(--font-mono); padding:.26rem .55rem; letter-spacing:.04em}
+.lang button[aria-pressed="true"]{background:var(--ink); color:var(--bg)}
+
+/* ---------- control console ---------- */
+.deck{
+  display:flex; align-items:center; flex-wrap:wrap; gap:.45rem .75rem; padding:.42rem .7rem; border-radius:1rem;
+  background:var(--console); color:var(--console-ink); box-shadow:inset 0 -.2rem 0 rgba(0,0,0,.28);
+}
+.deck .sep{width:2px; align-self:stretch; background:var(--console-3); border-radius:2px; flex:none}
+.sw{
+  display:inline-flex; align-items:center; gap:.65rem; padding:.32rem .45rem .32rem .55rem; flex:none;
+  border-radius:.85rem; border:2px solid var(--console-3); background:var(--console-2); color:var(--console-ink); text-align:left;
+}
+.sw-ic{width:2.15rem; height:2.15rem; border-radius:50%; display:grid; place-items:center; background:var(--console-3); color:var(--console-ink-2); transition:background .2s, box-shadow .2s}
+.sw-ic svg{width:1.45rem; height:1.45rem}
+.sw.on .sw-ic{background:var(--sc); color:var(--so); box-shadow:0 0 0 .25rem var(--sg)}
+.sw-txt{display:flex; flex-direction:column; line-height:1.05}
+.sw-txt b{font-family:var(--font-display); font-weight:800; font-size:1.3rem}
+.sw-txt small{font-size:var(--fs-min); color:var(--console-ink-2)}
+.sw-track{position:relative; width:4.6rem; height:2.15rem; border-radius:99px; background:var(--track-off); box-shadow:inset 0 .12rem .3rem rgba(0,0,0,.55); transition:background .2s; flex:none}
+.sw.on .sw-track{background:var(--sc)}
+.sw-knob{position:absolute; top:.2rem; left:.2rem; width:1.75rem; height:1.75rem; border-radius:50%; background:linear-gradient(var(--knob-1), var(--knob-2)); box-shadow:0 .1rem .2rem rgba(0,0,0,.5); transition:transform .2s}
+.sw.on .sw-knob{transform:translateX(2.45rem)}
+.sw-state{position:absolute; top:50%; right:.45rem; transform:translateY(-50%); font:800 var(--fs-min) var(--font-mono); letter-spacing:.02em; color:var(--console-ink-2)}
+.sw.on .sw-state{right:auto; left:.45rem; color:var(--so)}
+.sw-eyes{--sc:var(--eyes); --sg:var(--eyes-glow); --so:var(--on-eyes)}
+.sw-ears{--sc:var(--ears); --sg:var(--ears-glow); --so:var(--on-ears)}
+.sw.busy{cursor:progress}
+.sw.busy .sw-knob{animation:busy .9s ease-in-out infinite}
+@keyframes busy{50%{opacity:.45}}
+.sw.small{gap:.5rem; padding:.25rem .4rem .25rem .5rem; border-style:dashed}
+.sw.small .sw-ic{width:1.7rem; height:1.7rem; background:transparent}
+.sw.small .sw-ic svg{width:1.3rem; height:1.3rem}
+.sw.small.on .sw-ic{background:transparent; color:var(--console-ink); box-shadow:none}
+.sw.small .sw-txt b{font-family:var(--font-body); font-size:var(--fs-read); font-weight:700}
+.sw.small .sw-track{width:3.1rem; height:1.55rem}
+.sw.small .sw-knob{width:1.15rem; height:1.15rem}
+.sw.small.on .sw-knob{transform:translateX(1.55rem)}
+.sw.small.on .sw-track{background:repeating-linear-gradient(135deg, var(--trouble) 0 .3rem, var(--console-3) .3rem .6rem)}
+.sw.small.on{border-style:solid; border-color:var(--trouble)}
+.sw[disabled]:not(.busy){opacity:.38; cursor:not-allowed}
+.field{display:flex; flex-direction:column; gap:.12rem; flex:none}
+.field label{font-size:var(--fs-min); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--console-ink-2); line-height:1.1}
+.selwrap{position:relative}
+.selwrap::after{content:""; position:absolute; right:.7rem; top:50%; width:.45rem; height:.45rem; border-right:2px solid var(--console-ink-2); border-bottom:2px solid var(--console-ink-2); transform:translateY(-70%) rotate(45deg); pointer-events:none}
+select{appearance:none; -webkit-appearance:none; font-weight:700; font-size:var(--fs-read); color:var(--console-ink); background:var(--console-2); border:2px solid var(--console-3); border-radius:.55rem; padding:.24rem 2rem .24rem .6rem}
+select option{background:var(--console-2); color:var(--console-ink)}
+.transport{display:flex; align-items:center; gap:.6rem; flex:1 1 15rem; min-width:15rem}
+.play{width:2.7rem; height:2.7rem; flex:none; border-radius:50%; border:0; background:var(--console-ink); color:var(--console); display:grid; place-items:center}
+.play svg{width:1.2rem; height:1.2rem}
+.scrub{position:relative; flex:1; min-width:5rem; height:2.2rem; display:flex; align-items:center}
+.scrub input{width:100%; margin:0; height:2.2rem; background:transparent; -webkit-appearance:none; appearance:none; --pct:100%}
+.scrub input::-webkit-slider-runnable-track{height:.5rem; border-radius:99px; background:linear-gradient(90deg, var(--console-ink) var(--pct), var(--console-3) var(--pct))}
+.scrub input::-moz-range-track{height:.5rem; border-radius:99px; background:linear-gradient(90deg, var(--console-ink) var(--pct), var(--console-3) var(--pct))}
+.scrub input::-webkit-slider-thumb{-webkit-appearance:none; width:1.3rem; height:1.3rem; margin-top:-.4rem; border-radius:50%; background:var(--console-ink); border:.2rem solid var(--console); box-shadow:0 0 0 2px var(--console-ink)}
+.scrub input::-moz-range-thumb{width:1rem; height:1rem; border-radius:50%; background:var(--console-ink); border:.2rem solid var(--console)}
+.ticks{position:absolute; left:.65rem; right:.65rem; top:50%; pointer-events:none}
+.ticks i{position:absolute; top:-.95rem; width:.24rem; height:.5rem; border-radius:2px; background:var(--ears); transform:translateX(-50%)}
+.time{font:700 var(--fs-read) var(--font-mono); font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--console-ink)}
+.snd{display:inline-flex; align-items:center; gap:.35rem; flex:none; height:2.3rem; padding:0 .65rem 0 .5rem; border-radius:.6rem; border:2px solid var(--console-3); background:var(--console-2); color:var(--console-ink); font-weight:700; font-size:var(--fs-aux)}
+.snd svg{width:1.35rem; height:1.35rem}
+.snd[aria-pressed="false"]{color:var(--console-ink-2); border-style:dashed; background:transparent}
+.snd[hidden]{display:none}
+.time span{color:var(--console-ink-2)}
+.finish{display:inline-flex; align-items:center; gap:.4rem; flex:none; margin-left:auto; border:2px solid var(--console-ink); background:transparent; color:var(--console-ink); border-radius:.6rem; padding:.38rem .75rem; font-weight:700; font-size:var(--fs-read)}
+.finish svg{width:1.2rem; height:1.2rem}
+.finish[aria-pressed="true"]{background:var(--console-ink); color:var(--console)}
+.forget{display:none; margin-left:0; border-color:var(--live)}
+.live-note{display:none; margin:0; flex:1 1 16rem; min-width:0; font-size:var(--fs-read); line-height:1.25; color:var(--console-ink-2); text-wrap:balance}
+.app.live .forget{display:inline-flex}
+.app.live .live-note{display:block}
+.app.live #sw-fog, .app.live #sw-noise, .app.live .field, .app.live .transport, .app.live .deck .sep.s2{display:none}
+
+/* ---------- main grid ---------- */
+.main{
+  display:grid; min-height:0;
+  grid-template-columns:21.5rem minmax(0,1fr) 36.5rem;
+  grid-template-rows:minmax(0,1fr);
+  grid-template-areas:"senses mid right";
+  gap:.8rem 1.2rem;
+}
+.mid{grid-area:mid; display:flex; flex-direction:column; gap:.7rem; min-height:0; min-width:0}
+.right{grid-area:right; display:flex; flex-direction:column; gap:.7rem; min-height:0; min-width:0}
+.colhead{display:flex; align-items:center; gap:.5rem; margin:0; font-family:var(--font-display); font-weight:700; font-size:1.25rem; line-height:1.1; text-wrap:balance}
+.step{display:inline-grid; place-items:center; flex:none; width:1.6rem; height:1.6rem; border-radius:50%; border:2px solid currentColor; font:700 var(--fs-min) var(--font-mono)}
+.lbl{font-size:var(--fs-aux); font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-2); line-height:1.15}
+
+/* ---------- 1. senses ---------- */
+.senses{grid-area:senses; display:flex; flex-direction:column; gap:.55rem; min-height:0; min-width:0; --lens-h:12rem}
+.robot{display:grid; grid-template-columns:8.6rem minmax(0,1fr); gap:.4rem; align-items:center; flex:none}
+.dog{display:block; width:100%; height:auto}
+.dog .d-eyes-off,.dog .d-muffs,.dog .d-fog,.dog .d-noise,.dog .d-zz{display:none}
+.dog.eyes-off .d-eyes-on, .dog.sleep .d-eyes-on{display:none}
+.dog.eyes-off .d-eyes-off, .dog.sleep .d-eyes-off{display:inline}
+.dog.ears-off .d-earled{display:none}
+.dog.ears-off .d-muffs{display:inline}
+.dog.foggy:not(.eyes-off) .d-fog{display:inline}
+.dog.noisy:not(.ears-off) .d-noise{display:inline}
+.dog.sleep .d-zz{display:inline}
+.say{position:relative; margin:0 0 0 .55rem; padding:.35rem .65rem; background:var(--surface); border:2px solid var(--ink); border-radius:.8rem; font-weight:700; font-size:var(--fs-read); line-height:1.25; text-wrap:pretty}
+.say::before{content:""; position:absolute; left:-.62rem; top:50%; width:1rem; height:1rem; background:var(--surface); border-left:2px solid var(--ink); border-bottom:2px solid var(--ink); transform:translateY(-50%) rotate(45deg) skew(8deg,8deg)}
+.say[hidden]{display:none}
+
+.panel{flex:none; border:2px solid var(--pc); border-radius:.9rem; background:var(--surface); overflow:hidden; min-width:0}
+.panel-eyes{--pc:var(--eyes); --ps:var(--eyes-soft); --pi:var(--eyes-ink); --po:var(--on-eyes)}
+.panel-ears{--pc:var(--ears); --ps:var(--ears-soft); --pi:var(--ears-ink); --po:var(--on-ears)}
+.ph{display:flex; align-items:center; gap:.45rem; padding:.3rem .55rem .3rem .65rem; background:var(--ps); color:var(--pi)}
+.ph > svg{width:1.45rem; height:1.45rem; flex:none}
+.ph h3{margin:0; font-family:var(--font-display); font-weight:800; font-size:1.2rem; line-height:1.1}
+.ph .sub{font-size:var(--fs-aux); color:var(--ink-2)}
+.ph .cond{display:none; font-size:var(--fs-min); font-weight:700; color:var(--ink); padding:.04rem .4rem; border-radius:.3rem; border:1.5px solid var(--line-2); background:repeating-linear-gradient(135deg, var(--trouble) 0 .25rem, transparent .25rem .5rem); white-space:nowrap}
+.ph .cond.show{display:inline-block}
+.onoff{margin-left:auto; font:800 var(--fs-min) var(--font-mono); letter-spacing:.04em; padding:.06rem .42rem; border-radius:.3rem; background:var(--pc); color:var(--po)}
+.panel.off{border-style:dashed; border-color:var(--line-2)}
+.panel.off .ph{background:var(--sunk); color:var(--ink-2)}
+.panel.off .onoff{background:transparent; color:var(--ink-2); box-shadow:inset 0 0 0 1.5px var(--line-2)}
+.pb{padding:.5rem .65rem .55rem}
+
+.eyes-body{display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto; gap:.5rem .7rem; align-items:start; align-content:start}
+.eyes-body .lens{grid-column:1; grid-row:1 / span 2}
+.eyes-body .eyes-info{grid-column:2; grid-row:1}
+.eyes-body .cap{grid-column:2; grid-row:2}
+.senses.tight .eyes-body .lens{grid-row:1}
+.senses.tight .eyes-body .cap{grid-column:1 / -1}
+.lens{position:relative; height:var(--lens-h); aspect-ratio:9/16; border-radius:.55rem; overflow:hidden; background:var(--sunk); border:2px solid var(--eyes)}
+.lens img{display:block; width:100%; height:100%; object-fit:cover}
+.lens .iris{position:absolute; inset:0; margin:auto; width:88%; height:auto; display:none}
+.lens .nopic{position:absolute; inset:0; display:none; place-items:center; color:var(--line-2)}
+.lens .nopic svg{width:45%; height:auto}
+.lens.empty .nopic{display:grid}
+.lens.empty img{display:none}
+.panel.off .lens{border-color:var(--line-2); background:var(--dog-visor); display:grid; place-items:center}
+.panel.off .lens img, .panel.off .lens .nopic{display:none}
+.panel.off .lens .iris{display:block; position:static}
+.lens .cm{position:absolute; width:.7rem; height:.7rem; border:2px solid #ffffff; opacity:.85}
+.lens .cm.a{top:.3rem; left:.3rem; border-right:0; border-bottom:0}
+.lens .cm.b{top:.3rem; right:.3rem; border-left:0; border-bottom:0}
+.lens .cm.c{bottom:.3rem; left:.3rem; border-right:0; border-top:0}
+.lens .cm.d{bottom:.3rem; right:.3rem; border-left:0; border-top:0}
+.panel.off .lens .cm, .lens.empty .cm{display:none}
+.eyes-info{display:flex; flex-direction:column; gap:.5rem; min-width:0}
+.demo-tag{align-self:flex-start; font-size:var(--fs-min); font-weight:700; line-height:1.2; color:var(--ink-2); padding:.1rem .45rem; border-radius:.3rem; border:1.5px solid var(--line-2); background:var(--surface-2)}
+.app.live .demo-tag{display:none}
+.cap{margin:0; font-size:var(--fs-read); line-height:1.3; color:var(--ink-2); text-wrap:pretty}
+.readouts{margin:0; display:flex; flex-direction:column; gap:.45rem}
+.ro{display:flex; flex-direction:column; gap:.15rem}
+.ro dt{font-size:var(--fs-aux); color:var(--ink-2); line-height:1.1}
+.ro dd{margin:0; display:flex; align-items:center; gap:.45rem; min-width:0; font-weight:700; font-size:var(--fs-read); line-height:1.2}
+.qbar{flex:1; height:.55rem; border-radius:99px; background:var(--sunk); overflow:hidden}
+.qbar i{display:block; height:100%; background:var(--eyes); border-radius:99px}
+.mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:var(--fs-aux)}
+.swatch{width:2.4rem; height:1.25rem; border-radius:.3rem; border:1.5px solid var(--line-2); flex:none}
+.dot{width:.7rem; height:.7rem; border-radius:50%; flex:none; background:var(--eyes)}
+.dot.no{background:transparent; box-shadow:inset 0 0 0 2px var(--ink-3)}
+.eyes-info.nopic .ro-more{display:none}
+.offmsg{display:none; margin:0; font-family:var(--font-display); font-weight:700; font-size:1.1rem; line-height:1.2; color:var(--ink-2); text-wrap:balance}
+.panel.off .offmsg{display:block}
+.panel.off .when-on{display:none}
+
+.ears-body{display:flex; flex-direction:column; gap:.45rem}
+.chips{display:flex; flex-wrap:wrap; gap:.3rem; min-height:1.9rem; align-items:center; margin-top:.25rem}
+.chip{display:inline-flex; align-items:center; gap:.28rem; padding:.12rem .5rem .12rem .38rem; border-radius:99px; background:var(--ears-soft); color:var(--ears-ink); border:1.5px solid var(--ears); font-weight:700; font-size:var(--fs-aux); line-height:1.25; white-space:nowrap}
+.chip svg{width:1.05rem; height:1.05rem; flex:none}
+.chip .to{font-weight:400; color:var(--ink-2)}
+.chip .n{font:700 var(--fs-min) var(--font-mono); background:var(--ears); color:var(--on-ears); border-radius:99px; padding:0 .32rem}
+.chip.ans{box-shadow:0 0 0 2px var(--ears)}
+.chip.more{background:transparent; border-style:dashed; color:var(--ears-ink); font:700 var(--fs-aux) var(--font-mono); padding-inline:.5rem}
+.none{font-size:var(--fs-aux); color:var(--ink-2)}
+.loud-row{display:flex; align-items:baseline; justify-content:space-between; gap:.5rem}
+.loud-val{font-family:var(--font-display); font-weight:800; font-size:1.15rem; line-height:1; color:var(--ears-ink); white-space:nowrap}
+.meter{position:relative; display:grid; grid-template-columns:11fr 8fr 11fr; height:1.6rem; margin-top:.5rem; border-radius:.4rem}
+.zone{display:grid; place-items:center; font-size:var(--fs-aux); font-weight:700; color:var(--ink-2); border:1.5px solid transparent; line-height:1}
+.zone:nth-child(1){background:var(--ears-z1); border-radius:.4rem 0 0 .4rem}
+.zone:nth-child(2){background:var(--ears-z2)}
+.zone:nth-child(3){background:var(--ears-z3); border-radius:0 .4rem .4rem 0}
+.zone.act{color:var(--ink); border-color:var(--ears); border-width:2px}
+.needle{position:absolute; top:0; bottom:0; width:0; transition:left .35s}
+.needle::before,.needle::after{content:""; position:absolute; left:-.42rem; border:.42rem solid transparent}
+.needle::before{top:-.55rem; border-top:.5rem solid var(--ink)}
+.needle::after{bottom:-.55rem; border-bottom:.5rem solid var(--ink)}
+.note{margin:.15rem 0 0; display:flex; flex-direction:column; gap:.1rem; font-size:var(--fs-aux); line-height:1.25; color:var(--ink-2); text-wrap:pretty}
+.note b{display:flex; align-items:center; gap:.35rem; font-size:var(--fs-read); color:var(--ink)}
+.note b svg{width:1.2rem; height:1.2rem; flex:none; color:var(--ink-2)}
+
+/* ---------- 2. stage ---------- */
+.stage{display:flex; flex-direction:column; gap:.55rem; flex:1 1 auto; min-height:0; min-width:0}
+.board{
+  position:relative; flex:1; min-height:13rem; display:flex; flex-direction:column; gap:.3rem; padding:.6rem .6rem .5rem;
+  border-radius:1rem; border:2px solid var(--line-2); background-color:var(--av-paper);
+  background-image:linear-gradient(var(--av-grid) 1px, transparent 1px), linear-gradient(90deg, var(--av-grid) 1px, transparent 1px);
+  background-size:1.25rem 1.25rem; background-position:-1px -1px;
+}
+.board .cm{position:absolute; width:1rem; height:1rem; border:2.5px solid var(--ink-3)}
+.board .cm.a{top:.45rem; left:.45rem; border-right:0; border-bottom:0}
+.board .cm.b{top:.45rem; right:.45rem; border-left:0; border-bottom:0}
+.board .cm.c{bottom:.45rem; left:.45rem; border-right:0; border-top:0}
+.board .cm.d{bottom:.45rem; right:.45rem; border-left:0; border-top:0}
+.board-main{position:relative; flex:1; min-height:0; display:flex; gap:.6rem}
+.av-wrap{position:relative; flex:1; min-width:0}
+.av-wrap > svg{position:absolute; inset:0; width:100%; height:100%}
+.avatar .av-txt{font-family:var(--font-display); font-weight:800}
+.avatar .av-pet{font-family:var(--font-emoji)}
+.avatar .av-hl{animation:hlpulse 1.6s ease-in-out infinite}
+.avatar .av-flash{animation:flash 1.7s ease-out forwards}
+@keyframes hlpulse{50%{opacity:.5}}
+@keyframes flash{0%,55%{opacity:1}100%{opacity:0}}
+.av-key{flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:.2rem 1rem; padding:0 1.2rem; font-size:var(--fs-aux); color:var(--ink-2); line-height:1.2}
+.av-key span{display:inline-flex; align-items:center; gap:.35rem}
+.av-key svg{width:1.6rem; height:1.1rem; flex:none}
+.imag{flex:none; width:13.5rem; max-height:calc(100% - .3rem); align-self:flex-start; margin:.3rem .5rem 0 0; display:flex; flex-direction:column; gap:.3rem; padding:.45rem .5rem .5rem; background:var(--surface); border:1.5px solid var(--line-2); border-radius:.4rem; transform:rotate(1.2deg); box-shadow:0 .2rem 0 var(--line)}
+.imag[hidden]{display:none}
+.imag h3{margin:0; font-family:var(--font-display); font-weight:700; font-size:1.05rem; line-height:1.1}
+.imag img{display:block; flex:0 1 auto; width:100%; aspect-ratio:1; min-height:5rem; object-fit:contain; border-radius:.2rem}
+.imag .imag-txt{flex:none; display:flex; flex-direction:column; gap:.25rem}
+.imag p{margin:0; font-size:var(--fs-aux); line-height:1.28; color:var(--ink-2)}
+.imag p b{color:var(--ink)}
+.imag .gen{font-size:var(--fs-min); color:var(--ink-2); line-height:1.2}
+.summary{display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:.4rem 1.2rem; align-items:center; flex:none}
+.know{margin:0; font-family:var(--font-display); font-weight:700; font-size:1.15rem; line-height:1.15; text-wrap:balance}
+.know b{font-size:1.45rem; font-weight:800}
+.know .sure-n{color:var(--cert-ink)}
+.pips{display:flex; gap:.3rem; margin-top:.3rem; flex-wrap:wrap}
+.pip{width:1.8rem; height:1.8rem; border-radius:.45rem; display:grid; place-items:center; border:2px solid transparent}
+.pip svg{width:1.1rem; height:1.1rem}
+.pip.c-sure{background:var(--sure); border-color:var(--sure); color:var(--sure-ink)}
+.pip.c-think{background:var(--think-bg); border-color:var(--sure); color:var(--cert-ink)}
+.pip.c-guess{background:transparent; border:2px dashed var(--sure); color:var(--cert-ink)}
+.pip.c-unknown{background:transparent; border:2px dashed var(--line-2); color:var(--unk)}
+.share{display:flex; flex-direction:column; gap:.3rem; min-width:0}
+.share-bar{display:flex; height:1.1rem; border-radius:.35rem; overflow:hidden; background:var(--sunk)}
+.share-bar i{display:block; height:100%; transition:width .35s}
+.share-bar .sb-eyes{background:var(--eyes)}
+.share-bar .sb-ears{background:var(--ears)}
+.share-leg{display:flex; justify-content:space-between; gap:.5rem; font-weight:700; font-size:var(--fs-aux)}
+.share-leg span{display:inline-flex; align-items:center; gap:.3rem}
+.share-leg svg{width:1.1rem; height:1.1rem}
+.share-leg .e{color:var(--eyes-ink)}
+.share-leg .a{color:var(--ears-ink)}
+
+/* ---------- what if ---------- */
+.whatif{flex:none; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:.5rem; align-items:stretch; min-width:0}
+.wi-head{grid-column:1/-1; display:flex; align-items:baseline; gap:.7rem; flex-wrap:wrap}
+.wi-head p{margin:0; font-size:var(--fs-aux); line-height:1.25; color:var(--ink-2)}
+.wi{position:relative; display:grid; grid-template-columns:minmax(0,1fr); align-items:end; gap:.15rem; min-width:0; padding:.3rem .5rem .4rem; background:var(--surface); border:2px solid var(--line); border-radius:.8rem; color:var(--ink); text-align:left; transition:border-color .2s, box-shadow .2s, transform .2s}
+.wi:hover{border-color:var(--line-2)}
+.wi[aria-pressed="true"]{border-color:var(--ink); box-shadow:0 .28rem 0 var(--ink); transform:translateY(-.12rem)}
+.wi-av{grid-column:1/-1; position:relative; display:block; width:100%; height:6.6rem}
+.wi-av svg{display:block; width:100%; height:100%}
+.wi-sg{position:absolute; left:0; top:.1rem; display:flex; gap:.2rem}
+.wi-lbl{font-weight:700; font-size:var(--fs-aux); line-height:1.1; min-width:0; text-align:center; text-wrap:balance}
+.wi-k{position:absolute; top:.35rem; right:.45rem; font:700 var(--fs-aux) var(--font-mono); color:var(--ink-2); white-space:nowrap; line-height:1}
+.wi-k b{font-size:1.35rem; color:var(--ink)}
+.sg{display:inline-grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:50%; flex:none}
+.sg svg{width:.95rem; height:.95rem}
+.sg.on-eyes{background:var(--eyes); color:var(--on-eyes)}
+.sg.on-ears{background:var(--ears); color:var(--on-ears)}
+.sg.off{background:var(--surface); color:var(--ink-3); box-shadow:inset 0 0 0 1.5px var(--line-2)}
+.wi-now{position:absolute; top:-.6rem; left:50%; transform:translateX(-50%); display:none; font:800 var(--fs-min) var(--font-mono); letter-spacing:.04em; text-transform:uppercase; background:var(--ink); color:var(--bg); border-radius:.3rem; padding:0 .4rem; z-index:1}
+.wi[aria-pressed="true"] .wi-now{display:block}
+
+/* ---------- 3. why ---------- */
+.why{display:flex; flex-direction:column; gap:.45rem; flex:none; min-width:0}
+.whyhead{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.3rem .8rem}
+.clue-key{display:flex; align-items:center; flex-wrap:wrap; gap:.2rem .45rem; font-size:var(--fs-aux); color:var(--ink-2); line-height:1.2}
+.clue-key .kb{position:relative; width:5.5rem; height:.75rem; border-radius:.2rem; background:var(--sunk); flex:none}
+.clue-key .kb::before{content:""; position:absolute; left:50%; top:-.18rem; bottom:-.18rem; width:2px; margin-left:-1px; background:var(--ink-3)}
+.clue-key .kb i{position:absolute; top:0; bottom:0; border-radius:.2rem}
+.clue-key .kb .l{right:50%; width:28%; background:repeating-linear-gradient(135deg, var(--ink-3) 0 .15rem, transparent .15rem .3rem); box-shadow:inset 0 0 0 1.5px var(--ink-3)}
+.clue-key .kb .r{left:50%; width:44%; background:var(--ink-3)}
+.cards{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:.5rem}
+.card{display:flex; flex-direction:column; gap:.28rem; min-width:0; padding:.45rem .65rem .5rem; background:var(--surface); border:1.5px solid var(--line); border-radius:.75rem; transition:box-shadow .25s, border-color .25s}
+.card.dim{background:var(--surface-2); border-style:dashed; border-color:var(--line-2)}
+.card.dim .clues, .card.dim .because{opacity:.55}
+.card.hl{border-color:var(--ink); box-shadow:0 0 0 .3rem var(--hl)}
+.card.changed{animation:changed 1.7s ease-out}
+@keyframes changed{0%,40%{box-shadow:0 0 0 .3rem var(--hl)}100%{box-shadow:0 0 0 0 transparent}}
+.cq{display:flex; align-items:flex-start; gap:.45rem; font-size:var(--fs-read); color:var(--ink); line-height:1.2; text-wrap:balance}
+.cq > svg{width:1.35rem; height:1.35rem; flex:none; color:var(--ink-2)}
+.cq > span:first-of-type{min-width:0}
+.needs{flex:none; font-size:var(--fs-min); font-weight:700; color:var(--ink-2); border:1.5px dashed var(--line-2); border-radius:99px; padding:.02rem .45rem; white-space:nowrap}
+.ans{display:flex; align-items:center; gap:.2rem .45rem; min-height:1.85rem; flex-wrap:wrap}
+.pill{display:inline-flex; align-items:center; gap:.3rem; padding:.1rem .5rem .1rem .4rem; border-radius:99px; border:2px solid transparent; font-weight:700; font-size:max(1.02rem, 13.5px); line-height:1.15; white-space:nowrap}
+.dots{display:inline-flex; gap:.14rem}
+.dots b{width:.42rem; height:.42rem; border-radius:50%; background:currentColor; opacity:.28}
+.dots b.f{opacity:1}
+.c-sure{background:var(--sure); color:var(--sure-ink); border-color:var(--sure)}
+.c-think{background:var(--think-bg); color:var(--cert-ink); border-color:var(--sure)}
+.c-guess{background:transparent; color:var(--cert-ink); border:2px dashed var(--sure)}
+.c-unknown{background:transparent; color:var(--unk); border:2px dashed var(--unk)}
+.val{font-family:var(--font-display); font-weight:800; font-size:1.4rem; line-height:1; overflow-wrap:anywhere}
+.disagree{display:inline-flex; align-items:center; gap:.25rem; padding:.08rem .45rem; border-radius:.35rem; background:var(--hl); color:var(--hl-ink); font-weight:800; font-size:var(--fs-min); white-space:nowrap}
+.disagree svg{width:.95rem; height:.95rem; flex:none}
+.clues{display:flex; flex-direction:column; gap:.22rem}
+.clue{display:grid; grid-template-columns:1.25rem minmax(0,1fr); align-items:center; gap:.45rem}
+.clue > svg{width:1.25rem; height:1.25rem; color:var(--sc)}
+.s-eyes{--sc:var(--eyes); --sci:var(--eyes-ink)}
+.s-ears{--sc:var(--ears); --sci:var(--ears-ink)}
+.cbar{position:relative; height:.85rem; border-radius:.2rem; background:var(--sunk)}
+.cbar::before{content:""; position:absolute; left:50%; top:-.18rem; bottom:-.18rem; width:2px; margin-left:-1px; background:var(--ink-3); z-index:1}
+.cbar i{position:absolute; top:0; bottom:0; background:var(--sc); border-radius:.2rem; box-shadow:inset 0 0 0 1.5px var(--sci); transition:width .3s, left .3s}
+.cbar i.neg{background:repeating-linear-gradient(135deg, var(--sc) 0 .16rem, transparent .16rem .32rem); box-shadow:inset 0 0 0 1.5px var(--sci)}
+.cbar i.unk{background:var(--line-2); box-shadow:none}
+.cbar i.over::after{content:""; position:absolute; left:100%; top:50%; border:.39rem solid transparent; border-left:.42rem solid var(--sci); border-right:0; transform:translateY(-50%)}
+.cbar i.neg.over::after{left:auto; right:100%; border-left:0; border-right:.42rem solid var(--sci)}
+.clue.off > svg{color:var(--ink-3)}
+.clue.off .cbar{height:1.1rem; display:grid; place-items:center; background:repeating-linear-gradient(135deg, var(--sunk) 0 .25rem, transparent .25rem .5rem); box-shadow:inset 0 0 0 1.5px var(--line)}
+.clue.off .cbar::before{display:none}
+.clue.off .cbar span{font:700 var(--fs-min) var(--font-mono); color:var(--ink-2); line-height:1; background:var(--surface); padding:0 .3rem; border-radius:.2rem}
+.because{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.14rem; font-size:var(--fs-read); line-height:1.25}
+.because li{display:grid; grid-template-columns:1.1rem minmax(0,1fr); gap:.35rem; align-items:start}
+.because li > svg{width:1.1rem; height:1.1rem; margin-top:.1rem}
+.because li > span{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.because .muted{color:var(--ink-2)}
+.because .solo{grid-template-columns:minmax(0,1fr)}
+.because .dis{color:var(--ink); font-weight:700}
+
+.never{flex:none; margin-top:auto; display:flex; flex-direction:column; gap:.5rem; min-width:0; padding:.6rem .95rem .7rem; border-radius:1rem; background:var(--never-bg); color:var(--never-ink); border:2px solid var(--never-line)}
+.never h2{margin:0; display:flex; align-items:center; flex-wrap:wrap; gap:.2rem .55rem; font-family:var(--font-display); font-weight:800; font-size:1.3rem; line-height:1.1}
+.never h2 svg{width:1.6rem; height:1.6rem; flex:none; color:var(--never-slash)}
+.never h2 small{font:400 var(--fs-aux) var(--font-body); color:var(--never-ink-2)}
+.never ul{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:.5rem 1.1rem}
+.never li{display:grid; grid-template-columns:1.9rem minmax(0,1fr); gap:.5rem; align-items:start}
+.never .ni{width:1.9rem; height:1.9rem; color:var(--never-ink)}
+.never .ni .slash{stroke:var(--never-slash); stroke-width:2.4; stroke-linecap:round}
+.never .ni .slash-bg{stroke:var(--never-bg); stroke-width:5.5; stroke-linecap:round}
+.never li p{margin:0; font-size:var(--fs-read); line-height:1.25; color:var(--never-ink-2); text-wrap:pretty}
+.never li b{color:var(--never-ink); font-weight:700; margin-right:.25rem}
+.never.compact li p .nb{display:none}
+
+/* ---------- footer ---------- */
+.credits{margin:0; font-size:max(.66rem, 11px); line-height:1.3; color:var(--ink-2)}
+
+/* ---------- overlays ---------- */
+.stage-ov{position:fixed; z-index:40; top:calc(.4rem + env(safe-area-inset-top, 0px)); left:max(16px, 1.2rem);
+  max-width:min(calc(100vw - 2.4rem), max(26rem, calc(100vw - 2.4rem - 36rem)));
+  display:flex; align-items:baseline; flex-wrap:wrap; column-gap:.9rem; padding:.3rem 1.1rem .38rem; border-radius:.8rem;
+  background:var(--console); color:var(--console-ink); box-shadow:0 .4rem 1.2rem rgba(0,0,0,.22); animation:slidein .35s ease-out}
+.stage-ov b{font-family:var(--font-display); font-weight:800; font-size:1.7rem; line-height:1.15}
+.stage-ov span{font-size:var(--fs-read); color:var(--console-ink-2)}
+.stage-ov span:empty{display:none}
+@keyframes slidein{from{transform:translateY(-.6rem); opacity:0}}
+.caption{position:fixed; z-index:52; left:50%; bottom:calc(1.1rem + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%);
+  width:max-content; max-width:min(72rem, calc(100vw - 2.4rem)); padding:.6rem 1.3rem .65rem; border-radius:.8rem;
+  background:var(--cap-bg); color:var(--cap-ink); font-size:1.6rem; font-weight:700; line-height:1.3; text-align:center; text-wrap:balance}
+.endcard{position:fixed; inset:0; z-index:50; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.8rem; padding:1.2rem 1.2rem calc(1.2rem + var(--cap-reserve, 0px)); background:var(--scrim); overflow:auto}
+.keepsake{
+  container-type:inline-size; flex:none;
+  width:min(29rem, 100%, calc((100vh - 6.5rem - var(--cap-reserve, 0px)) * 2 / 3)); max-width:100%; aspect-ratio:2/3;
+  background:var(--print-paper); color:var(--print-ink); border-radius:.5rem; box-shadow:0 1.2rem 3rem rgba(0,0,0,.35);
+  --av-paper:#f8fafd; --av-grid:rgba(47,125,225,.10); --av-line:#15243b; --av-ink:#15243b; --av-mark:#15243b; --av-face:#ffffff; --av-limb:#61728d; --av-shadow:rgba(19,35,59,.15); --av-unk:#7d8ca2;
+  --av-disc:#edf2f8; --av-disc-line:#c3cfdf;
+  --sure:#17804a; --sure-ink:#ffffff; --think-bg:#d3eedd; --cert-ink:#0f5c36; --unk:#6f7f96;
+  animation:cardin .4s ease-out;
+}
+@keyframes cardin{from{transform:translateY(1rem) rotate(-1deg); opacity:0}}
+.ks-in{height:100%; display:flex; flex-direction:column; gap:3cqw; padding:6cqw 6.5cqw 5cqw}
+.ks-top{display:flex; align-items:flex-end; justify-content:space-between; gap:3cqw}
+.ks-top h2{margin:0; font-family:var(--font-display); font-weight:800; font-size:7.4cqw; line-height:1}
+.ks-date{font:700 3.2cqw var(--font-mono); color:var(--print-ink-2); white-space:nowrap}
+.ks-pic{position:relative; flex:1; min-height:0; border-radius:2cqw; border:.5cqw solid var(--print-line); background-color:#f8fafd;
+  background-image:linear-gradient(var(--print-grid) 1px, transparent 1px), linear-gradient(90deg, var(--print-grid) 1px, transparent 1px); background-size:4cqw 4cqw}
+.ks-pic > svg{position:absolute; inset:2cqw; width:calc(100% - 4cqw); height:calc(100% - 4cqw)}
+.ks-row{display:flex; align-items:flex-start; gap:3cqw}
+.ks-facts{flex:1; min-width:0; list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1.8cqw}
+.ks-facts li{display:flex; flex-direction:column; align-items:flex-start; gap:.8cqw; font-size:3.9cqw; line-height:1.15}
+.ks-facts .pill{font-size:3.1cqw; padding:.4cqw 2cqw .4cqw 1.5cqw}
+.ks-facts .pill .dots b{width:1.3cqw; height:1.3cqw}
+.ks-facts b{font-family:var(--font-display); font-weight:800; font-size:4.6cqw}
+.ks-none{font-size:3.8cqw; color:var(--print-ink-2)}
+.ks-imag{flex:none; width:31cqw; margin:0; padding:1.4cqw 1.4cqw 1.2cqw; background:#ffffff; border:.4cqw solid var(--print-line); transform:rotate(2.5deg); box-shadow:0 1cqw 2cqw rgba(19,35,59,.18)}
+.ks-imag img{display:block; width:100%; aspect-ratio:1; object-fit:cover}
+.ks-imag figcaption{font-size:2.4cqw; line-height:1.2; margin-top:.8cqw; color:var(--print-ink-2)}
+.ks-note{margin:0; display:flex; gap:2cqw; align-items:flex-start; padding-top:2.4cqw; border-top:.4cqw dashed var(--print-line); font-size:3.55cqw; line-height:1.3; font-weight:700}
+.ks-note svg{width:5.5cqw; height:5.5cqw; flex:none; color:var(--print-ink-2)}
+.ks-foot{display:flex; justify-content:space-between; gap:2cqw; font:500 2.4cqw var(--font-mono); color:var(--print-ink-2)}
+.card-close{border:2px solid var(--console-ink); background:var(--console); color:var(--console-ink); border-radius:.6rem; padding:.4rem 1rem; font-weight:700; font-size:var(--fs-read)}
+.card-btns{display:flex; gap:.6rem}
+.card-forget{display:none; border-color:var(--live)}
+.app.live ~ .endcard .card-forget{display:inline-block}
+.app.no-chrome ~ .endcard .card-close{display:none}
+.forgot{position:fixed; inset:0; z-index:55; display:grid; place-items:center; padding:1.5rem; background:var(--scrim); animation:fadein .3s ease-out}
+.forgot-box{display:flex; flex-direction:column; align-items:center; gap:.6rem; padding:1.6rem 2.4rem 1.8rem; border-radius:1.2rem; background:var(--surface); border:2px solid var(--ink); text-align:center; box-shadow:0 1rem 3rem rgba(0,0,0,.3)}
+.forgot-box svg{width:9rem; height:auto}
+.forgot-box b{font-family:var(--font-display); font-weight:800; font-size:2.4rem; line-height:1.05}
+.forgot-box span{font-size:1.2rem; color:var(--ink-2)}
+@keyframes fadein{from{opacity:0}}
+.live-msg{position:fixed; z-index:48; left:50%; top:30%; transform:translateX(-50%); width:min(40rem, calc(100vw - 32px)); padding:1.2rem 1.4rem; border-radius:1rem; background:var(--surface); border:2px solid var(--live); box-shadow:0 1rem 3rem rgba(0,0,0,.25)}
+.live-msg h2{margin:0 0 .4rem; font-family:var(--font-display); font-size:1.5rem; line-height:1.15}
+.live-msg p{margin:.3rem 0; font-size:var(--fs-read)}
+.live-msg code, .fatal-box code{display:block; margin:.5rem 0; padding:.6rem .8rem; border-radius:.5rem; background:var(--console); color:var(--console-ink); font:700 var(--fs-read) var(--font-mono); overflow-wrap:anywhere}
+.live-msg .retry{color:var(--ink-2); font-size:var(--fs-aux)}
+.fatal{position:fixed; inset:0; z-index:60; display:grid; place-items:center; padding:1.5rem; background:var(--bg)}
+.fatal-box{max-width:40rem; padding:1.4rem 1.6rem; border-radius:1rem; background:var(--surface); border:2px solid var(--ink)}
+.fatal-box h2{margin:0 0 .5rem; font-family:var(--font-display); font-size:1.5rem}
+.fatal-box p{margin:.4rem 0; font-size:var(--fs-read)}
+
+/* ---------- smaller screens: stack and scroll ---------- */
+@media (max-width: 1239px){
+  html{font-size:15px}
+  .app{height:auto; min-height:100%}
+  .deck{flex-wrap:wrap}
+  .transport{order:10; flex:1 1 26rem}
+  .finish{order:11}
+  .main{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); grid-template-rows:auto; grid-template-areas:"senses stage" "whatif whatif" "never never" "why why"}
+  .mid,.right{display:contents}
+  .stage{grid-area:stage} .whatif{grid-area:whatif} .why{grid-area:why} .never{grid-area:never; margin-top:0}
+  .board{min-height:27rem}
+  .wi-av{height:7.5rem}
+  .never ul{grid-template-columns:repeat(3, minmax(0,1fr))}
+}
+@media (max-width: 760px){
+  .top{flex-wrap:wrap}
+  .brand{flex-basis:100%}
+  .brand h1{font-size:1.5rem}
+  .main{grid-template-columns:minmax(0,1fr); grid-template-areas:"stage" "never" "senses" "whatif" "why"}
+  .step{display:none}
+  .robot{grid-template-columns:7.5rem minmax(0,1fr)}
+  .board-main{flex-direction:column}
+  .board{min-height:0}
+  .av-wrap{flex:none; height:21rem}
+  .imag{width:auto; max-width:100%; margin:0; transform:none; flex-direction:row; flex-wrap:wrap; align-items:flex-start}
+  .imag h3{flex-basis:100%}
+  .imag img{width:8rem}
+  .imag .imag-txt{flex:1; min-width:9rem; display:flex; flex-direction:column; gap:.3rem}
+  .summary{grid-template-columns:minmax(0,1fr)}
+  .cards{grid-template-columns:minmax(0,1fr)}
+  .never ul{grid-template-columns:minmax(0,1fr)}
+  .whatif{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .sw{flex:1 1 auto}
+  .deck{gap:.6rem}
+  .deck .sep{display:none}
+  .live-note{flex-basis:100%}
+  .stage-ov{left:16px; right:16px; max-width:none}
+  .stage-ov b{font-size:1.4rem}
+  .caption{font-size:1.15rem}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important; transition:none!important}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.6 10-6.6S22 12 22 12s-3.6 6.6-10 6.6S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.3" fill="currentColor"/></symbol>
+    <symbol id="i-ear" viewBox="0 0 24 24"><path d="M6.2 8.8a6.3 6.3 0 1 1 12.6 0c0 4.4-3.4 5.5-4.6 8.4-.7 1.8-1.2 4.3-4.3 4.3a3.6 3.6 0 0 1-3.5-2.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.4 9a2.9 2.9 0 1 0-5.8 0c0 1.2.7 1.7 1.5 2.3.9.7 1 2 .1 2.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-paw" viewBox="0 0 24 24"><ellipse cx="12" cy="15.6" rx="4.6" ry="3.9" fill="currentColor"/><circle cx="5.9" cy="10.6" r="2.1" fill="currentColor"/><circle cx="9.4" cy="6.4" r="2.1" fill="currentColor"/><circle cx="14.6" cy="6.4" r="2.1" fill="currentColor"/><circle cx="18.1" cy="10.6" r="2.1" fill="currentColor"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.7-.8 1.7-1.7 0-.9-.8-1.3-.8-2.1 0-.9.7-1.5 1.6-1.5H17a4 4 0 0 0 4-4C21 6.8 17 3 12 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.6" cy="11.4" r="1.4" fill="currentColor"/><circle cx="9.8" cy="7.4" r="1.4" fill="currentColor"/><circle cx="14.6" cy="7.4" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8.6 3.6 3 6.6l2.2 4.3 2.6-1.1v10.7h8.4V9.8l2.6 1.1L21 6.6l-5.6-3c-.4 1.6-1.8 2.6-3.4 2.6S9 5.2 8.6 3.6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-glasses" viewBox="0 0 24 24"><circle cx="6.6" cy="13.4" r="3.7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.4" cy="13.4" r="3.7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.2 12.8q1.8-1.4 3.6 0M2.9 13 2 9.4M21.1 13l.9-3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-energy" viewBox="0 0 24 24"><path d="M3 7.5h6M1.8 12h7.2M3 16.5h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16.2" cy="12" r="4.8" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="i-voice" viewBox="0 0 24 24"><path d="M3.6 9.4v5.2h3.6L12 18.4V5.6L7.2 9.4H3.6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.4 9a4.2 4.2 0 0 1 0 6M18.4 6.3a8 8 0 0 1 0 11.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="5.5" y="4.5" width="4.6" height="15" rx="1.2" fill="currentColor"/><rect x="13.9" y="4.5" width="4.6" height="15" rx="1.2" fill="currentColor"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M3.6 9.4v5.2h3.6L12 18.4V5.6L7.2 9.4H3.6z" fill="currentColor"/><path d="M15.4 9a4.2 4.2 0 0 1 0 6M18.4 6.3a8 8 0 0 1 0 11.4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M3.6 9.4v5.2h3.6L12 18.4V5.6L7.2 9.4H3.6z" fill="currentColor"/><path d="M15.6 9.4l5.2 5.2M20.8 9.4l-5.2 5.2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-fog" viewBox="0 0 24 24"><path d="M7 14.5h10.2a3.6 3.6 0 0 0 .4-7.2 5.3 5.3 0 0 0-10.2 1.4A3 3 0 0 0 7 14.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 18h12M8 21h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-noise" viewBox="0 0 24 24"><path d="M2 12h2l2-6 3 12 3-15 3 18 3-12 2 5 2-2h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="5" y="2.8" width="14" height="18.4" rx="1.8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9.2" r="2.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.2 16.4c.8-2 2.2-2.9 3.8-2.9s3 .9 3.8 2.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-erase" viewBox="0 0 24 24"><path d="m14.6 4.2 5.2 5.2a1.6 1.6 0 0 1 0 2.3l-7.6 7.6H8.1L4.2 15.4a1.6 1.6 0 0 1 0-2.3l8.1-8.9a1.6 1.6 0 0 1 2.3 0z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9.4 9.8 5.8 5.8M12.2 19.3H21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.6 4.2 5.6v6c0 4.9 3.3 8.4 7.8 9.8 4.5-1.4 7.8-4.9 7.8-9.8v-6L12 2.6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m8.4 12 2.5 2.5 4.8-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2 5 13.5h6L10 22l9-12h-6z" fill="currentColor"/></symbol>
+    <symbol id="i-nocam" viewBox="0 0 24 24"><rect x="2.8" y="7" width="13" height="10.5" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15.8 10.5 5.4-3v9.5l-5.4-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-norec" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.6" fill="currentColor"/><path d="M5.2 5.2l13.6 13.6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-n-who" viewBox="0 0 24 24"><rect x="2.8" y="5" width="18.4" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="8.6" cy="10.6" r="2.1" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M5.6 16c.7-1.5 1.7-2.1 3-2.1s2.3.6 3 2.1M14 10h4.2M14 13.4h3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-n-feel" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M7.8 15.4c1.4-1.4 2.8-1.4 4.2 0s2.8 1.4 4.2 0" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-n-age" viewBox="0 0 24 24"><rect x="4" y="11.5" width="16" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M4 15.4c1.3 1 2.7 1 4 0s2.7-1 4 0 2.7 1 4 0 2.7-1 4 0M12 11.5V7.8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M12 3.2c1.2 1.3 1.4 2.4 0 3.4-1.4-1-1.2-2.1 0-3.4z" fill="currentColor"/></symbol>
+    <symbol id="i-n-origin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.9"/><ellipse cx="12" cy="12" rx="3.9" ry="9" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M3.4 9h17.2M3.4 15h17.2" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+    <symbol id="i-n-health" viewBox="0 0 24 24"><path d="M12 20.3S3.4 15.2 3.4 9.1A4.6 4.6 0 0 1 12 6.8a4.6 4.6 0 0 1 8.6 2.3c0 6.1-8.6 11.2-8.6 11.2z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M6.2 12h3l1.4-2.4 2 4.6 1.5-2.2h3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-n-head" viewBox="0 0 24 24"><path d="M6 16c0-5.2 2.4-9.3 6-9.3s6 4.1 6 9.3" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><path d="M2.6 16.6c3-1.4 15.8-1.4 18.8 0-3 1.7-15.8 1.7-18.8 0z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <!-- "only a guess" texture for colour fills: paper stripes that keep the hue -->
+    <pattern id="av-stripes" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="14" fill="#ffffff" fill-opacity=".55"/></pattern>
+  </defs>
+</svg>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M11 9C4.5 7 1 13 1.8 21.5c.4 4.4 5.6 5.4 7.3 1.6L12 16z" fill="var(--ink)"/>
+        <path d="M29 9c6.5-2 10 4 9.2 12.5-.4 4.4-5.6 5.4-7.3 1.6L28 16z" fill="var(--ink)"/>
+        <rect x="7" y="5.5" width="26" height="28" rx="10.5" fill="var(--ink)"/>
+        <circle cx="15" cy="16.5" r="3.7" fill="var(--eyes)"/><circle cx="25" cy="16.5" r="3.7" fill="var(--eyes)"/>
+        <ellipse cx="20" cy="25" rx="3" ry="2.1" fill="var(--bg)"/>
+        <circle cx="5" cy="18.5" r="1.9" fill="var(--ears)"/><circle cx="35" cy="18.5" r="1.9" fill="var(--ears)"/>
+      </svg>
+      <h1 data-i18n="title">How does a robot see you?</h1>
+      <span class="proto" data-i18n="prototype">Prototype</span>
+    </div>
+    <span class="live-badge" id="live-badge" hidden><i aria-hidden="true"></i><span data-i18n="liveBadge">LIVE – nothing is recorded</span></span>
+    <div class="status" id="status" aria-live="polite">
+      <span class="st st-eyes" id="st-eyes"><svg aria-hidden="true"><use href="#i-eye"/></svg><b data-i18n="eyes">Eyes</b><em id="st-eyes-v">ON</em></span>
+      <span class="st st-ears" id="st-ears"><svg aria-hidden="true"><use href="#i-ear"/></svg><b data-i18n="ears">Ears</b><em id="st-ears-v">ON</em></span>
+      <span class="st-cond" id="st-cond" hidden></span>
+      <span class="st-vis" id="st-vis"></span>
+      <span class="st-time" id="st-time">00:00</span>
+      <span class="st-load" id="st-load" hidden data-i18n="loading">Loading…</span>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="lang-en" data-lang="en" aria-pressed="true" lang="en">EN</button>
+      <button type="button" id="lang-fr" data-lang="fr" aria-pressed="false" lang="fr">FR</button>
+      <button type="button" id="lang-nl" data-lang="nl" aria-pressed="false" lang="nl">NL</button>
+    </div>
+  </header>
+
+  <div class="deck" id="deck">
+    <button type="button" class="sw sw-eyes on" id="sw-eyes" role="switch" aria-checked="true" aria-keyshortcuts="E">
+      <span class="sw-ic"><svg aria-hidden="true"><use href="#i-eye"/></svg></span>
+      <span class="sw-txt"><b data-i18n="eyes">Eyes</b><small data-i18n="eyesSub">camera</small></span>
+      <span class="sw-track" aria-hidden="true"><span class="sw-state" data-i18n="on">ON</span><span class="sw-knob"></span></span>
+    </button>
+    <button type="button" class="sw sw-ears on" id="sw-ears" role="switch" aria-checked="true" aria-keyshortcuts="H">
+      <span class="sw-ic"><svg aria-hidden="true"><use href="#i-ear"/></svg></span>
+      <span class="sw-txt"><b data-i18n="ears">Ears</b><small data-i18n="earsSub">microphone</small></span>
+      <span class="sw-track" aria-hidden="true"><span class="sw-state" data-i18n="on">ON</span><span class="sw-knob"></span></span>
+    </button>
+    <span class="sep s1" aria-hidden="true"></span>
+    <button type="button" class="sw small" id="sw-fog" role="switch" aria-checked="false">
+      <span class="sw-ic"><svg aria-hidden="true"><use href="#i-fog"/></svg></span>
+      <span class="sw-txt"><b data-i18n="fog">Foggy lens</b></span>
+      <span class="sw-track" aria-hidden="true"><span class="sw-knob"></span></span>
+    </button>
+    <button type="button" class="sw small" id="sw-noise" role="switch" aria-checked="false">
+      <span class="sw-ic"><svg aria-hidden="true"><use href="#i-noise"/></svg></span>
+      <span class="sw-txt"><b data-i18n="noise">Noisy room</b></span>
+      <span class="sw-track" aria-hidden="true"><span class="sw-knob"></span></span>
+    </button>
+    <span class="sep s2" aria-hidden="true"></span>
+    <div class="field">
+      <label for="visitor-select" data-i18n="visitor">Visitor</label>
+      <span class="selwrap"><select id="visitor-select"></select></span>
+    </div>
+    <p class="live-note" id="live-note">Switch my eyes and ears on to start. Nothing is recorded.</p>
+    <div class="transport">
+      <button type="button" class="play" id="btn-play" aria-label="Play" aria-keyshortcuts="Space"><svg aria-hidden="true"><use href="#i-play"/></svg></button>
+      <div class="scrub">
+        <input type="range" id="scrubber" min="0" max="1" step="0.1" value="1" aria-label="Time">
+        <div class="ticks" id="ticks" aria-hidden="true"></div>
+      </div>
+      <span class="time" id="time-label">00:00 <span>/ 00:00</span></span>
+      <button type="button" class="snd" id="btn-sound" aria-pressed="true"><svg aria-hidden="true"><use href="#i-sound"/></svg><span class="snd-txt" id="snd-txt">Voice</span></button>
+    </div>
+    <button type="button" class="finish" id="btn-finish" aria-pressed="false"><svg aria-hidden="true"><use href="#i-card"/></svg><span data-i18n="finish">Finish</span></button>
+    <button type="button" class="finish forget" id="btn-forget"><svg aria-hidden="true"><use href="#i-erase"/></svg><span data-i18n="forget">Forget me</span></button>
+  </div>
+
+  <main class="main" id="main">
+    <!-- 1. what the robot senses -->
+    <section class="senses" id="senses" aria-labelledby="h-senses">
+      <h2 class="colhead" id="h-senses"><span class="step">1</span><span data-i18n="colSenses">What the robot senses</span></h2>
+      <div class="robot">
+        <svg class="dog" id="dog" viewBox="0 0 170 140" role="img" aria-labelledby="dog-t">
+          <title id="dog-t">Robot dog</title>
+          <ellipse cx="85" cy="134" rx="62" ry="5" fill="var(--av-shadow)"/>
+          <path d="M131 88q21-10 17-31" fill="none" stroke="var(--dog-line)" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="148" cy="56" r="5" fill="var(--dog-joint)" stroke="var(--dog-line)" stroke-width="2"/>
+          <rect x="44" y="96" width="12" height="32" rx="6" fill="var(--dog-joint)" stroke="var(--dog-line)" stroke-width="2.5"/>
+          <rect x="114" y="96" width="12" height="32" rx="6" fill="var(--dog-joint)" stroke="var(--dog-line)" stroke-width="2.5"/>
+          <rect x="34" y="78" width="102" height="36" rx="16" fill="var(--dog-body)" stroke="var(--dog-line)" stroke-width="3"/>
+          <rect x="60" y="100" width="14" height="32" rx="6.5" fill="var(--dog-body)" stroke="var(--dog-line)" stroke-width="3"/>
+          <rect x="96" y="100" width="14" height="32" rx="6.5" fill="var(--dog-body)" stroke="var(--dog-line)" stroke-width="3"/>
+          <circle cx="67" cy="108" r="4" fill="var(--dog-joint)"/><circle cx="103" cy="108" r="4" fill="var(--dog-joint)"/>
+          <rect x="40" y="13" width="90" height="70" rx="27" fill="var(--dog-body)" stroke="var(--dog-line)" stroke-width="3"/>
+          <rect x="51" y="24" width="68" height="33" rx="15" fill="var(--dog-visor)"/>
+          <g class="d-eyes-on">
+            <circle cx="70" cy="40.5" r="13" fill="var(--eyes-glow)"/><circle cx="100" cy="40.5" r="13" fill="var(--eyes-glow)"/>
+            <circle cx="70" cy="40.5" r="8.5" fill="var(--eyes)"/><circle cx="100" cy="40.5" r="8.5" fill="var(--eyes)"/>
+            <circle cx="67" cy="37.5" r="2.6" fill="#ffffff"/><circle cx="97" cy="37.5" r="2.6" fill="#ffffff"/>
+          </g>
+          <g class="d-eyes-off">
+            <circle cx="70" cy="40.5" r="8.5" fill="var(--dog-lid)"/><circle cx="100" cy="40.5" r="8.5" fill="var(--dog-lid)"/>
+            <path d="M61.5 41q8.5 5 17 0M91.5 41q8.5 5 17 0" fill="none" stroke="var(--dog-visor)" stroke-width="2.6" stroke-linecap="round"/>
+          </g>
+          <ellipse cx="85" cy="69" rx="17" ry="10.5" fill="var(--dog-body)" stroke="var(--dog-line)" stroke-width="2.5"/>
+          <ellipse cx="85" cy="64.5" rx="6.5" ry="4.6" fill="var(--dog-visor)"/>
+          <path d="M85 69v3.5M78.5 73.5q6.5 4 13 0" fill="none" stroke="var(--dog-line)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M47 22C31 15 17 30 20 55c1.5 11 14 13 18 4l8-19z" fill="var(--dog-ear)" stroke="var(--dog-line)" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M123 22c16-7 30 8 27 33-1.5 11-14 13-18 4l-8-19z" fill="var(--dog-ear)" stroke="var(--dog-line)" stroke-width="3" stroke-linejoin="round"/>
+          <circle cx="30" cy="45" r="6.4" fill="var(--dog-joint)" stroke="var(--dog-line)" stroke-width="1.6"/>
+          <circle cx="140" cy="45" r="6.4" fill="var(--dog-joint)" stroke="var(--dog-line)" stroke-width="1.6"/>
+          <g class="d-earled">
+            <circle cx="30" cy="45" r="11" fill="var(--ears-glow)"/><circle cx="140" cy="45" r="11" fill="var(--ears-glow)"/>
+            <circle cx="30" cy="45" r="6.4" fill="var(--ears)" stroke="var(--dog-line)" stroke-width="1.6"/>
+            <circle cx="140" cy="45" r="6.4" fill="var(--ears)" stroke="var(--dog-line)" stroke-width="1.6"/>
+            <circle cx="28" cy="43" r="1.9" fill="#ffffff" opacity=".9"/><circle cx="138" cy="43" r="1.9" fill="#ffffff" opacity=".9"/>
+          </g>
+          <g class="d-fog">
+            <path d="M52 50c-6 0-7-9 0-10 1-8 12-9 15-3 4-5 13-4 14 2 4-4 13-3 14 3 6-2 12 3 9 8-1 3-4 4-6 4H55z" fill="var(--fog)"/>
+          </g>
+          <g class="d-muffs">
+            <path d="M28 36Q85-24 142 36" fill="none" stroke="var(--muff-band)" stroke-width="5.5" stroke-linecap="round"/>
+            <circle cx="29" cy="44" r="13" fill="var(--muff)" stroke="var(--dog-line)" stroke-width="2.5"/>
+            <circle cx="141" cy="44" r="13" fill="var(--muff)" stroke="var(--dog-line)" stroke-width="2.5"/>
+          </g>
+          <g class="d-noise" fill="none" stroke="var(--ink-3)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 22l4-7 4 9 4-11 3 6"/><path d="M151 22l4-7 4 9 4-11 3 6"/>
+          </g>
+          <g class="d-zz" fill="var(--ink-2)" font-family="Baloo 2, sans-serif" font-weight="800">
+            <text x="132" y="14" font-size="16">z</text><text x="146" y="4" font-size="12">z</text>
+          </g>
+        </svg>
+        <p class="say" id="dog-say" role="status" aria-live="polite"></p>
+      </div>
+
+      <section class="panel panel-eyes" id="panel-eyes" aria-labelledby="h-eyes">
+        <div class="ph">
+          <svg aria-hidden="true"><use href="#i-eye"/></svg>
+          <h3 id="h-eyes" data-i18n="eyes">Eyes</h3><span class="sub" data-i18n="eyesSub">camera</span>
+          <span class="cond" id="eyes-cond" data-i18n="fog">Foggy lens</span>
+          <span class="onoff" id="eyes-onoff">ON</span>
+        </div>
+        <div class="pb eyes-body">
+          <div class="lens" id="lens">
+            <img id="frame-img" alt="" decoding="sync">
+            <span class="nopic" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-eye"/></svg></span>
+            <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+            <span id="iris-slot"></span>
+          </div>
+          <div class="eyes-info" id="eyes-info">
+            <p class="offmsg" data-i18n="eyesOff">Eyes switched off – no pictures are used</p>
+            <span class="demo-tag when-on" data-i18n="exampleVisitor">Example visitor from a research video</span>
+            <dl class="readouts when-on">
+              <div class="ro"><dt class="sr" data-i18n="person">Person</dt><dd id="ro-person"></dd></div>
+              <div class="ro ro-more" id="ro-q-row"><dt data-i18n="quality">Picture</dt><dd><span class="qbar"><i id="ro-qbar"></i></span><span class="mono" id="ro-q"></span></dd></div>
+              <div class="ro ro-more" id="ro-s-row"><dt data-i18n="measured">Clothes colour</dt><dd id="ro-swatch"></dd></div>
+            </dl>
+          </div>
+          <p class="cap when-on" data-i18n="eyesCaption">Faces are pixelated on this screen. The robot looks, then forgets the picture.</p>
+        </div>
+      </section>
+
+      <section class="panel panel-ears" id="panel-ears" aria-labelledby="h-ears">
+        <div class="ph">
+          <svg aria-hidden="true"><use href="#i-ear"/></svg>
+          <h3 id="h-ears" data-i18n="ears">Ears</h3><span class="sub" data-i18n="earsSub">microphone</span>
+          <span class="cond" id="ears-cond" data-i18n="noise">Noisy room</span>
+          <span class="onoff" id="ears-onoff">ON</span>
+        </div>
+        <div class="pb ears-body">
+          <p class="offmsg" data-i18n="earsOff">Ears switched off – no sound is used</p>
+          <div class="when-on">
+            <div class="lbl" data-i18n="wordsHeard">Words from my list</div>
+            <div class="chips" id="chips"></div>
+          </div>
+          <div class="when-on">
+            <div class="loud-row"><span class="lbl" data-i18n="loudNow">Voice loudness right now</span><span class="loud-val" id="loud-val"></span></div>
+            <div class="meter" id="meter">
+              <span class="zone" data-i18n="zQuiet">quiet</span><span class="zone" data-i18n="zNormal">normal</span><span class="zone" data-i18n="zLoud">loud</span>
+              <span class="needle" id="needle"></span>
+            </div>
+          </div>
+          <p class="note"><span class="when-on" data-i18n="earsNote">Only words from my word list are shown.</span><b><svg aria-hidden="true"><use href="#i-norec"/></svg><span data-i18n="nothingRecorded">Nothing is recorded.</span></b></p>
+        </div>
+      </section>
+    </section>
+
+    <div class="mid">
+      <!-- 2. the picture -->
+      <section class="stage" aria-labelledby="h-stage">
+        <h2 class="colhead" id="h-stage"><span class="step">2</span><span data-i18n="colSees">How the robot sees you</span></h2>
+        <div class="board" id="board">
+          <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+          <div class="board-main">
+            <div class="av-wrap" id="avatar"></div>
+            <figure class="imag" id="imag" hidden>
+              <h3 data-i18n="imagTitle">The robot's imagination</h3>
+              <img id="imag-img" alt="">
+              <div class="imag-txt"><p id="imag-cap"></p><span class="gen" id="imag-gen"></span></div>
+            </figure>
+          </div>
+          <div class="av-key" id="av-key"></div>
+        </div>
+        <div class="summary">
+          <div>
+            <p class="know" id="know"></p>
+            <div class="pips" id="pips"></div>
+          </div>
+          <div class="share">
+            <span class="lbl" data-i18n="shareLbl">Where my clues came from</span>
+            <div class="share-bar" id="share-bar"><i class="sb-eyes"></i><i class="sb-ears"></i></div>
+            <div class="share-leg" id="share-leg"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- what if -->
+      <section class="whatif" aria-labelledby="h-whatif">
+        <div class="wi-head">
+          <h2 class="colhead" id="h-whatif" data-i18n="whatIf">What if…?</h2>
+          <p data-i18n="whatIfSub">The same moment with other senses. Tap one to switch.</p>
+        </div>
+        <button type="button" class="wi" id="wi-both" data-cfg="camera+microphone" aria-pressed="false"><span class="wi-now" data-i18n="now">now</span><span class="wi-av"></span><span class="wi-lbl" data-i18n="cfgBoth">Eyes + ears</span><span class="wi-k"></span></button>
+        <button type="button" class="wi" id="wi-eyes" data-cfg="camera" aria-pressed="false"><span class="wi-now" data-i18n="now">now</span><span class="wi-av"></span><span class="wi-lbl" data-i18n="cfgEyes">Only eyes</span><span class="wi-k"></span></button>
+        <button type="button" class="wi" id="wi-ears" data-cfg="microphone" aria-pressed="false"><span class="wi-now" data-i18n="now">now</span><span class="wi-av"></span><span class="wi-lbl" data-i18n="cfgEars">Only ears</span><span class="wi-k"></span></button>
+        <button type="button" class="wi" id="wi-none" data-cfg="none" aria-pressed="false"><span class="wi-now" data-i18n="now">now</span><span class="wi-av"></span><span class="wi-lbl" data-i18n="cfgNone">No senses</span><span class="wi-k"></span></button>
+      </section>
+    </div>
+
+    <div class="right" id="right">
+      <!-- 3. why -->
+      <section class="why" aria-labelledby="h-why">
+        <div class="whyhead">
+          <h2 class="colhead" id="h-why"><span class="step">3</span><span data-i18n="colWhy">Why does the robot think this?</span></h2>
+          <div class="clue-key" id="clue-key"><span data-i18n="against">against</span><span class="kb" aria-hidden="true"><i class="l"></i><i class="r"></i></span><span data-i18n="for">for</span></div>
+        </div>
+        <div class="cards" id="cards"></div>
+      </section>
+
+      <!-- promises -->
+      <section class="never" id="never" aria-labelledby="h-never">
+        <h2 id="h-never"><svg aria-hidden="true"><use href="#i-shield"/></svg><span data-i18n="neverTitle">Things I will never guess</span><small data-i18n="neverSub">Some things are not a robot's business.</small></h2>
+        <ul id="never-list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <p class="credits">Prototype - not the final exhibit. Visitor recordings: Seamless Interaction dataset (Meta, 2025, CC BY-NC 4.0), faces pixelated, voices as recorded. Models: CLIP ViT-B/32 (LAION), Whisper small via faster-whisper, MediaPipe, Silero VAD. TUAI doctoral network (MSCA).</p>
+</div>
+
+<audio id="voice" preload="auto"></audio>
+
+<div class="stage-ov" id="stage-ov" hidden><b id="stage-title"></b><span id="stage-sub"></span></div>
+<div class="caption" id="caption" hidden></div>
+
+<div class="endcard" id="endcard" hidden>
+  <div class="keepsake" role="dialog" aria-modal="true" aria-labelledby="ks-title"><div class="ks-in">
+    <div class="ks-top"><h2 id="ks-title" data-i18n="cardTitle">How the robot saw me</h2><span class="ks-date" id="ks-date"></span></div>
+    <div class="ks-pic" id="ks-pic"></div>
+    <div class="ks-row"><ol class="ks-facts" id="ks-facts"></ol><span id="ks-imag-slot"></span></div>
+    <p class="ks-note"><svg aria-hidden="true"><use href="#i-nocam"/></svg><span data-i18n="cardNote">This card contains no photo of you. When you leave, the robot forgets everything.</span></p>
+    <div class="ks-foot"><span data-i18n="title">How does a robot see you?</span><span>Science is Wonderful! 2027</span></div>
+  </div></div>
+  <div class="card-btns"><button type="button" class="card-close" id="card-close" data-i18n="close">Close</button><button type="button" class="card-close card-forget" id="card-forget" data-i18n="forget">Forget me</button></div>
+</div>
+
+<div class="forgot" id="forgot" hidden role="status" aria-live="assertive">
+  <div class="forgot-box">
+    <svg viewBox="0 0 120 92" aria-hidden="true">
+      <path d="M30 18C12 10 2 28 5 52c1.5 12 15 14 20 4l8-24z" fill="var(--dog-ear)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/>
+      <path d="M90 18c18-8 28 10 25 34-1.5 12-15 14-20 4l-8-24z" fill="var(--dog-ear)" stroke="var(--ink)" stroke-width="3.5" stroke-linejoin="round"/>
+      <rect x="20" y="6" width="80" height="78" rx="30" fill="var(--dog-body)" stroke="var(--ink)" stroke-width="3.5"/>
+      <rect x="30" y="20" width="60" height="32" rx="15" fill="var(--dog-visor)"/>
+      <path d="M38 37q8 6 16 0M66 37q8 6 16 0" fill="none" stroke="var(--dog-lid)" stroke-width="3.5" stroke-linecap="round"/>
+      <ellipse cx="60" cy="66" rx="7" ry="5" fill="var(--dog-visor)"/>
+    </svg>
+    <b data-i18n="forgotTitle">I forgot everything!</b>
+    <span data-i18n="forgotSub">Ready for the next visitor.</span>
+  </div>
+</div>
+
+<div class="live-msg" id="live-msg" hidden role="alert">
+  <h2 data-i18n="liveDownTitle">I can't reach the live robot</h2>
+  <p data-i18n="liveDownMsg">Start it from the prototype folder. This page reconnects by itself.</p>
+  <code id="live-cmd">python live/run_live.py --camera 0 --mic default</code>
+  <p class="retry" data-i18n="liveRetry">Trying again every second…</p>
+</div>
+
+<div class="fatal" id="fatal" hidden>
+  <div class="fatal-box" role="alert">
+    <h2 id="fatal-title">The visitor files could not be loaded</h2>
+    <p id="fatal-msg"></p>
+    <code>python -m http.server</code>
+    <p id="fatal-detail" style="color:var(--ink-2); font-size:var(--fs-aux)"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= constants ================= */
+const SLOT_ORDER = ['animal', 'colour', 'shirt', 'glasses', 'energy', 'voice'];
+const SLOT_ICON = {animal: 'i-paw', colour: 'i-palette', shirt: 'i-shirt', glasses: 'i-glasses', energy: 'i-energy', voice: 'i-voice'};
+const SENSOR_ICON = {camera: 'i-eye', microphone: 'i-ear'};
+const SENSOR_CLASS = {camera: 'eyes', microphone: 'ears'};
+const CONFIGS = [
+  {key: 'camera+microphone', id: 'wi-both', label: 'cfgBoth', s: {camera: true, microphone: true}},
+  {key: 'camera', id: 'wi-eyes', label: 'cfgEyes', s: {camera: true, microphone: false}},
+  {key: 'microphone', id: 'wi-ears', label: 'cfgEars', s: {camera: false, microphone: true}},
+  {key: 'none', id: 'wi-none', label: 'cfgNone', s: {camera: false, microphone: false}},
+];
+const TROUBLE = {fog: 'foggy-eyes', noise: 'noisy-ears'};
+const COLOURS = {
+  red: '#e5484d', orange: '#f3902f', yellow: '#f6c945', green: '#46a96b', blue: '#3d86dc', purple: '#8f5fd0',
+  pink: '#f07fb5', brown: '#9b6a43', black: '#2a2f38', white: '#ffffff', grey: '#9ba5b2', gray: '#9ba5b2',
+};
+const LIGHT_COLOURS = new Set(['white', 'yellow', 'grey', 'gray']);
+const ANIMAL_EMOJI = {
+  dog: '\u{1F415}', cat: '\u{1F408}', horse: '\u{1F40E}', rabbit: '\u{1F407}', bird: '\u{1F426}', fish: '\u{1F41F}',
+  lion: '\u{1F981}', elephant: '\u{1F418}', bear: '\u{1F43B}', monkey: '\u{1F412}', turtle: '\u{1F422}', dinosaur: '\u{1F995}',
+};
+const LOUD = {lo: -15, hi: 15, quietMax: -4, loudMin: 4};
+const CLUE_SCALE = 6;
+const LENS_MAX = 12, LENS_MIN = 6.5;          // rem: the robot's-eye picture gives way first when a column is short
+const IS_LIVE = /^#live\b/i.test(location.hash);
+const LIVE_POLL_MS = 1000;
+
+/* ================= interface text ================= */
+const NBSP = ' ';
+const I18N = {
+  en: {
+    title: 'How does a robot see you?', prototype: 'Prototype', eyes: 'Eyes', ears: 'Ears', eyesSub: 'camera', earsSub: 'microphone',
+    on: 'ON', off: 'OFF', fog: 'Foggy lens', noise: 'Noisy room', unavailable: 'Not available for this visitor',
+    visitor: 'Visitor', play: 'Play', pause: 'Pause', finish: 'Finish', forget: 'Forget me', time: 'Time', loading: 'Loading…',
+    colSenses: 'What the robot senses', colSees: 'How the robot sees you', colWhy: 'Why does the robot think this?',
+    eyesCaption: 'Faces are pixelated on this screen. The robot looks, then forgets the picture.',
+    exampleVisitor: 'Example visitor from a research video', noPicture: 'No picture yet',
+    eyesOff: 'Eyes switched off – no pictures are used', earsOff: 'Ears switched off – no sound is used',
+    earsNote: 'Only words from my word list are shown.', nothingRecorded: 'Nothing is recorded.',
+    wordsHeard: 'Words from my list', noWords: 'None heard yet', loudNow: 'Voice loudness right now', listening: 'Listening…', noVoice: 'No voice heard',
+    zQuiet: 'quiet', zNormal: 'normal', zLoud: 'loud',
+    person: 'Person', personYes: 'I can see a person', personNo: "I can't see a person", quality: 'Picture quality', measured: 'Clothes colour', nothing: '–',
+    know0: "I don't know anything about you yet", know: 'I have an idea about {k} of {n} things', knowSure: ' – sure about {s}',
+    shareLbl: 'Where my clues came from', noClues: 'No clues yet',
+    against: 'against', for: 'for', keyBars: 'longer bar = more clues', cluePts: 'clue points', noAnswer: 'no answer yet',
+    keySure: 'sure', keyGuess: 'guessing', keyUnknown: "don't know yet",
+    cert_sure: "I'm sure", cert_think: 'I think', cert_guess: "I'm guessing", cert_unknown: "I don't know yet",
+    needsEyes: 'needs eyes', needsEars: 'needs ears', needsBoth: 'needs eyes or ears', disagree: 'Senses disagree!',
+    sensorOff_camera: 'off', sensorOff_microphone: 'off',
+    whatIf: 'What if…?', whatIfSub: 'The same moment with other senses. Tap one to switch.', now: 'now',
+    cfgBoth: 'Eyes + ears', cfgEyes: 'Only eyes', cfgEars: 'Only ears', cfgNone: 'No senses', knowsShort: 'has an idea about {k} of {n} things',
+    neverTitle: 'Things I will never guess', neverSub: "Some things are not a robot's business.",
+    never: [
+      ['Who you are', "I don't recognise faces or voices.", "I don't recognise faces or voices, and I forget you when you leave."],
+      ['How you feel', "Faces and voices don't really show it.", "Faces and voices don't really show feelings. Guessing them isn't allowed here."],
+      ['Your age or gender', 'Machines often get these wrong.', "Machines often get these wrong, and it's not my business."],
+      ['Where you come from', 'Skin, hair or accent say nothing.', 'Skin, hair or accent say nothing about who you are.'],
+      ['Your health', 'Glasses tell me nothing else.', 'Glasses help eyes. They tell me nothing else.'],
+      ['What you wear on your head', 'It can be part of a religion.', 'It can be part of what someone believes, so I never look at it.'],
+    ],
+    imagTitle: "The robot's imagination",
+    imagCaption: "AI-generated picture – the robot's imagination. It started from the robot's own drawing and got only these words:",
+    imagMay: 'It may invent details.', imagNoWords: 'no words at all', imagMade: 'Made with',
+    cardTitle: 'How the robot saw me', cardNote: 'This card contains no photo of you. When you leave, the robot forgets everything.',
+    cardNoFacts: "The robot hasn't found out anything yet.", cardImag: "AI-generated, the robot's imagination – not a photo", close: 'Close',
+    sayHello: 'Flip my switches and watch what changes!', sayEyesOff: "OK, I'll only use what you tell me.", sayEarsOff: "OK, I'll only use what I see.",
+    sayBothOff: "OK, I won't look or listen.", sayEyesOn: "Eyes on. I'm looking!", sayEarsOn: "Ears on. I'm listening!", sayBothOn: 'Eyes and ears on!',
+    sayFog: 'My lens is foggy. Pictures look blurry.', sayNoise: "It's noisy here. Words are hard to hear.",
+    sayFogOff: 'I wiped my lens. Pictures are clear again.', sayNoiseOff: "It's quiet again. I can hear words better.",
+    sayFogToNoise: "One problem at a time: I wiped my lens. Now it's noisy here.", sayNoiseToFog: "One problem at a time: it's quiet again. Now my lens is foggy.",
+    sayMissing: 'Sorry, this recording is not available.',
+    fileError: 'Open this page through a local web server: python -m http.server', loadError: 'The visitor files could not be loaded',
+    avatarLabel: "The robot's picture of the visitor", dogLabel: 'Robot dog', frameAlt: "What the robot's camera sees, pixelated", imagAlt: 'AI-generated picture',
+    short: {animal: 'Favourite animal', colour: 'Favourite colour', shirt: 'Clothes', glasses: 'Glasses', energy: 'Movement now', voice: 'Voice now'},
+    colon: ': ',
+    liveBadge: 'LIVE – nothing is recorded', liveNote: 'Switch my eyes and ears on to start. Nothing is recorded.', liveNoteOn: 'Pictures and sounds stay in my memory for a few seconds only. Nothing is recorded.',
+    forgotTitle: 'I forgot everything!', forgotSub: 'Ready for the next visitor.',
+    liveDownTitle: "I can't reach the live robot", liveDownMsg: 'Start it from the prototype folder. This page reconnects by itself.', liveRetry: 'Trying again every second…',
+    // explanation sentences (data templates)
+    cantEyes: "I can't tell: my eyes are off.", cantEars: "I can't tell: my ears are off.", cantBoth: "I can't tell: eyes and ears are off.",
+    tinyHint: 'Just a tiny hint so far.', noticedNothing: 'Nothing noticed yet.',
+    trustEyes: 'I trust my eyes more here.', trustEars: 'I trust my ears more here.',
+    voice: 'Voice', voiceOn: "Visitor's voice is on (the original recording). Click to mute.", voiceOff: "Visitor's voice is muted. Click to hear it.",
+  },
+  fr: {
+    title: `Comment un robot te voit-il${NBSP}?`, prototype: 'Prototype', eyes: 'Yeux', ears: 'Oreilles', eyesSub: 'caméra', earsSub: 'micro',
+    on: 'ON', off: 'OFF', fog: 'Objectif embué', noise: 'Salle bruyante', unavailable: 'Pas disponible pour ce visiteur',
+    visitor: 'Visiteur', play: 'Lire', pause: 'Pause', finish: 'Terminer', forget: 'Oublie-moi', time: 'Temps', loading: 'Chargement…',
+    colSenses: 'Ce que le robot perçoit', colSees: 'Comment le robot te voit', colWhy: `Pourquoi le robot pense-t-il cela${NBSP}?`,
+    eyesCaption: "Les visages sont pixelisés sur cet écran. Le robot regarde, puis oublie l'image.",
+    exampleVisitor: "Visiteur d'exemple, vidéo de recherche", noPicture: "Pas encore d'image",
+    eyesOff: "Yeux éteints – aucune image n'est utilisée", earsOff: "Oreilles éteintes – aucun son n'est utilisé",
+    earsNote: 'Seuls les mots de ma liste sont affichés.', nothingRecorded: "Rien n'est enregistré.",
+    wordsHeard: 'Mots de ma liste', noWords: 'Aucun pour l’instant', loudNow: 'Volume de la voix en ce moment', listening: 'J’écoute…', noVoice: 'Aucune voix entendue',
+    zQuiet: 'basse', zNormal: 'normale', zLoud: 'forte',
+    person: 'Personne', personYes: 'Je vois une personne', personNo: 'Je ne vois personne', quality: "Qualité de l'image", measured: 'Couleur des vêtements', nothing: '–',
+    know0: 'Je ne sais encore rien de toi', know: "J'ai une idée pour {k} choses sur {n}", know1: "J'ai une idée pour {k} chose sur {n}", knowSure: ' – sûr pour {s}',
+    shareLbl: "D'où viennent mes indices", noClues: "Pas encore d'indices",
+    against: 'contre', for: 'pour', keyBars: "barre plus longue = plus d'indices", cluePts: "points d'indice", noAnswer: 'pas encore de réponse',
+    keySure: 'sûr', keyGuess: 'je suppose', keyUnknown: 'je ne sais pas encore',
+    cert_sure: "J'en suis sûr", cert_think: 'Je pense', cert_guess: 'Je suppose', cert_unknown: 'Je ne sais pas encore',
+    needsEyes: 'il faut les yeux', needsEars: 'il faut les oreilles', needsBoth: 'il faut les yeux ou les oreilles', disagree: `Mes sens ne sont pas d'accord${NBSP}!`,
+    sensorOff_camera: 'éteints', sensorOff_microphone: 'éteintes',
+    whatIf: `Et si…${NBSP}?`, whatIfSub: "Le même moment avec d'autres sens. Touche une image pour changer.", now: 'maintenant',
+    cfgBoth: 'Yeux + oreilles', cfgEyes: 'Seulement les yeux', cfgEars: 'Seulement les oreilles', cfgNone: 'Aucun sens', knowsShort: 'a une idée pour {k} choses sur {n}',
+    neverTitle: 'Ce que je ne devinerai jamais', neverSub: 'Certaines choses ne regardent pas un robot.',
+    never: [
+      ['Qui tu es', 'Je ne reconnais ni visages ni voix.', "Je ne reconnais ni les visages ni les voix, et je t'oublie quand tu pars."],
+      ['Ce que tu ressens', 'Visages et voix ne le montrent pas vraiment.', "Les visages et les voix ne montrent pas vraiment les émotions. Les deviner est interdit ici."],
+      ['Ton âge ou ton genre', 'Les machines se trompent souvent.', 'Les machines se trompent souvent, et ça ne me regarde pas.'],
+      ["D'où tu viens", 'Peau, cheveux ou accent ne disent rien.', "La peau, les cheveux ou l'accent ne disent rien de qui tu es."],
+      ['Ta santé', "Les lunettes ne me disent rien d'autre.", "Les lunettes aident les yeux. Elles ne me disent rien d'autre."],
+      ['Ce que tu portes sur la tête', "Cela peut faire partie d'une religion.", "Cela peut faire partie de ce que quelqu'un croit, alors je ne le regarde jamais."],
+    ],
+    imagTitle: "L'imagination du robot",
+    imagCaption: `Image créée par une IA – l'imagination du robot. Elle part du dessin du robot et n'a reçu que ces mots${NBSP}:`,
+    imagMay: 'Elle peut inventer des détails.', imagNoWords: 'aucun mot', imagMade: 'Créée avec',
+    cardTitle: 'Comment le robot me voit', cardNote: 'Cette carte ne contient aucune photo de toi. Quand tu pars, le robot oublie tout.',
+    cardNoFacts: "Le robot n'a encore rien découvert.", cardImag: "Créée par une IA, l'imagination du robot – pas une photo", close: 'Fermer',
+    sayHello: `Appuie sur mes interrupteurs et regarde ce qui change${NBSP}!`, sayEyesOff: "D'accord, j'utilise seulement ce que tu me dis.", sayEarsOff: "D'accord, j'utilise seulement ce que je vois.",
+    sayBothOff: "D'accord, je ne regarde pas et je n'écoute pas.", sayEyesOn: `Yeux allumés. Je regarde${NBSP}!`, sayEarsOn: `Oreilles allumées. J'écoute${NBSP}!`, sayBothOn: `Yeux et oreilles allumés${NBSP}!`,
+    sayFog: 'Mon objectif est embué. Les images sont floues.', sayNoise: "Il y a du bruit. J'entends mal les mots.",
+    sayFogOff: "J'ai essuyé mon objectif. Les images sont nettes.", sayNoiseOff: "C'est calme à nouveau. J'entends mieux les mots.",
+    sayFogToNoise: `Un problème à la fois${NBSP}: j'ai essuyé mon objectif. Maintenant, il y a du bruit.`, sayNoiseToFog: `Un problème à la fois${NBSP}: c'est calme à nouveau. Maintenant, mon objectif est embué.`,
+    sayMissing: "Désolé, cet enregistrement n'est pas disponible.",
+    fileError: `Ouvre cette page avec un serveur web local${NBSP}: python -m http.server`, loadError: 'Les fichiers des visiteurs ne se chargent pas',
+    avatarLabel: 'Le dessin du visiteur fait par le robot', dogLabel: 'Chien robot', frameAlt: 'Ce que voit la caméra du robot, pixelisé', imagAlt: 'Image créée par une IA',
+    short: {animal: 'Animal préféré', colour: 'Couleur préférée', shirt: 'Vêtements', glasses: 'Lunettes', energy: 'Mouvement', voice: 'Voix'},
+    colon: `${NBSP}: `,
+    liveBadge: "EN DIRECT – rien n'est enregistré", liveNote: "Allume mes yeux et mes oreilles pour commencer. Rien n'est enregistré.", liveNoteOn: "Les images et les sons restent quelques secondes dans ma mémoire. Rien n'est enregistré.",
+    forgotTitle: `J'ai tout oublié${NBSP}!`, forgotSub: 'Prêt pour le prochain visiteur.',
+    liveDownTitle: 'Je ne trouve pas le robot en direct', liveDownMsg: 'Lance-le depuis le dossier prototype. Cette page se reconnecte toute seule.', liveRetry: 'Nouvel essai chaque seconde…',
+    cantEyes: `Je ne sais pas${NBSP}: mes yeux sont éteints.`, cantEars: `Je ne sais pas${NBSP}: mes oreilles sont éteintes.`, cantBoth: `Je ne sais pas${NBSP}: yeux et oreilles éteints.`,
+    tinyHint: "Juste un petit indice pour l'instant.", noticedNothing: "Rien remarqué pour l'instant.",
+    trustEyes: 'Ici, je fais plus confiance à mes yeux.', trustEars: 'Ici, je fais plus confiance à mes oreilles.',
+    voice: 'Voix', voiceOn: "La voix du visiteur est activée (enregistrement original). Clique pour couper le son.", voiceOff: "La voix du visiteur est coupée. Clique pour l'écouter.",
+  },
+  nl: {
+    title: 'Hoe ziet een robot jou?', prototype: 'Prototype', eyes: 'Ogen', ears: 'Oren', eyesSub: 'camera', earsSub: 'microfoon',
+    on: 'AAN', off: 'UIT', fog: 'Beslagen lens', noise: 'Lawaaierige zaal', unavailable: 'Niet beschikbaar voor deze bezoeker',
+    visitor: 'Bezoeker', play: 'Afspelen', pause: 'Pauze', finish: 'Klaar', forget: 'Vergeet mij', time: 'Tijd', loading: 'Laden…',
+    colSenses: 'Wat de robot merkt', colSees: 'Hoe de robot jou ziet', colWhy: 'Waarom denkt de robot dit?',
+    eyesCaption: 'Gezichten zijn op dit scherm gepixeld. De robot kijkt en vergeet het beeld daarna.',
+    exampleVisitor: 'Voorbeeldbezoeker uit een onderzoeksvideo', noPicture: 'Nog geen beeld',
+    eyesOff: 'Ogen uit – er worden geen beelden gebruikt', earsOff: 'Oren uit – er wordt geen geluid gebruikt',
+    earsNote: 'Alleen woorden uit mijn woordenlijst worden getoond.', nothingRecorded: 'Er wordt niets opgenomen.',
+    wordsHeard: 'Woorden uit mijn lijst', noWords: 'Nog geen gehoord', loudNow: 'Hoe luid de stem nu is', listening: 'Ik luister…', noVoice: 'Geen stem gehoord',
+    zQuiet: 'zacht', zNormal: 'normaal', zLoud: 'luid',
+    person: 'Persoon', personYes: 'Ik zie iemand', personNo: 'Ik zie niemand', quality: 'Beeldkwaliteit', measured: 'Kleur van je kleren', nothing: '–',
+    know0: 'Ik weet nog niets over jou', know: 'Ik heb een idee over {k} van de {n} dingen', knowSure: ' – zeker van {s}',
+    shareLbl: 'Waar mijn aanwijzingen vandaan komen', noClues: 'Nog geen aanwijzingen',
+    against: 'tegen', for: 'voor', keyBars: 'langere balk = meer aanwijzingen', cluePts: 'aanwijzingspunten', noAnswer: 'nog geen antwoord',
+    keySure: 'zeker', keyGuess: 'gok', keyUnknown: 'weet ik nog niet',
+    cert_sure: 'Ik weet het zeker', cert_think: 'Ik denk', cert_guess: 'Ik gok', cert_unknown: 'Ik weet het nog niet',
+    needsEyes: 'heeft ogen nodig', needsEars: 'heeft oren nodig', needsBoth: 'heeft ogen of oren nodig', disagree: 'Mijn zintuigen zijn het oneens!',
+    sensorOff_camera: 'uit', sensorOff_microphone: 'uit',
+    whatIf: 'Wat als…?', whatIfSub: 'Hetzelfde moment met andere zintuigen. Tik er een aan om te wisselen.', now: 'nu',
+    cfgBoth: 'Ogen + oren', cfgEyes: 'Alleen ogen', cfgEars: 'Alleen oren', cfgNone: 'Geen zintuigen', knowsShort: 'heeft een idee over {k} van de {n} dingen',
+    neverTitle: 'Wat ik nooit zal raden', neverSub: 'Sommige dingen gaan een robot niets aan.',
+    never: [
+      ['Wie je bent', 'Ik herken geen gezichten of stemmen.', 'Ik herken geen gezichten of stemmen, en ik vergeet je als je weggaat.'],
+      ['Hoe je je voelt', 'Dat zie je niet goed aan gezichten.', 'Aan gezichten en stemmen zie je niet goed hoe iemand zich voelt, en raden mag hier niet.'],
+      ['Je leeftijd of gender', 'Machines hebben het vaak mis.', 'Machines hebben het vaak mis, en het gaat mij niet aan.'],
+      ['Waar je vandaan komt', 'Huid, haar of accent zeggen niets.', 'Huid, haar of accent zeggen niets over wie je bent.'],
+      ['Je gezondheid', 'Een bril vertelt me verder niets.', 'Een bril helpt je ogen. Verder vertelt hij me niets.'],
+      ['Wat je op je hoofd draagt', 'Het kan bij iemands geloof horen.', 'Het kan bij iemands geloof horen, dus ik kijk er nooit naar.'],
+    ],
+    imagTitle: 'De fantasie van de robot',
+    imagCaption: 'Door AI gemaakte tekening – de fantasie van de robot. Ze begon bij de eigen tekening van de robot en kreeg alleen deze woorden:',
+    imagMay: 'Ze kan details verzinnen.', imagNoWords: 'geen woorden', imagMade: 'Gemaakt met',
+    cardTitle: 'Hoe de robot mij zag', cardNote: 'Op deze kaart staat geen foto van jou. Als je weggaat, vergeet de robot alles.',
+    cardNoFacts: 'De robot weet nog niets.', cardImag: 'Door AI gemaakt, de fantasie van de robot – geen foto', close: 'Sluiten',
+    sayHello: 'Zet mijn schakelaars om en kijk wat er verandert!', sayEyesOff: 'Oké, ik gebruik alleen wat je me vertelt.', sayEarsOff: 'Oké, ik gebruik alleen wat ik zie.',
+    sayBothOff: 'Oké, ik kijk en luister niet.', sayEyesOn: 'Ogen aan. Ik kijk!', sayEarsOn: 'Oren aan. Ik luister!', sayBothOn: 'Ogen en oren aan!',
+    sayFog: 'Mijn lens is beslagen. Beelden zijn wazig.', sayNoise: 'Het is lawaaierig. Woorden zijn moeilijk te horen.',
+    sayFogOff: 'Ik heb mijn lens schoongemaakt. De beelden zijn weer scherp.', sayNoiseOff: 'Het is weer stil. Ik hoor woorden beter.',
+    sayFogToNoise: 'Eén probleem tegelijk: ik heb mijn lens schoongemaakt. Nu is het lawaaierig.', sayNoiseToFog: 'Eén probleem tegelijk: het is weer stil. Nu is mijn lens beslagen.',
+    sayMissing: 'Sorry, deze opname is niet beschikbaar.',
+    fileError: 'Open deze pagina via een lokale webserver: python -m http.server', loadError: 'De bestanden van de bezoekers laden niet',
+    avatarLabel: 'De tekening die de robot van de bezoeker maakt', dogLabel: 'Robothond', frameAlt: 'Wat de camera van de robot ziet, gepixeld', imagAlt: 'Door AI gemaakte tekening',
+    short: {animal: 'Lievelingsdier', colour: 'Lievelingskleur', shirt: 'Kleren', glasses: 'Bril', energy: 'Beweging nu', voice: 'Stem nu'},
+    colon: ': ',
+    liveBadge: 'LIVE – er wordt niets opgenomen', liveNote: 'Zet mijn ogen en oren aan om te beginnen. Er wordt niets opgenomen.', liveNoteOn: 'Beelden en geluiden blijven maar een paar seconden in mijn geheugen. Er wordt niets opgenomen.',
+    forgotTitle: 'Ik ben alles vergeten!', forgotSub: 'Klaar voor de volgende bezoeker.',
+    liveDownTitle: 'Ik kan de live robot niet bereiken', liveDownMsg: 'Start hem vanuit de map prototype. Deze pagina maakt zelf weer verbinding.', liveRetry: 'Ik probeer het elke seconde opnieuw…',
+    cantEyes: 'Ik weet het niet: mijn ogen staan uit.', cantEars: 'Ik weet het niet: mijn oren staan uit.', cantBoth: 'Ik weet het niet: ogen en oren staan uit.',
+    tinyHint: 'Nog maar een kleine aanwijzing.', noticedNothing: 'Nog niets gemerkt.',
+    trustEyes: 'Hier vertrouw ik mijn ogen meer.', trustEars: 'Hier vertrouw ik mijn oren meer.',
+    voice: 'Stem', voiceOn: 'De stem van de bezoeker staat aan (de originele opname). Klik om te dempen.', voiceOff: 'De stem van de bezoeker staat uit. Klik om te luisteren.',
+  },
+};
+const QUESTIONS = {
+  en: {animal: 'What is your favourite animal?', colour: 'What is your favourite colour?', shirt: 'What colour are your clothes?',
+       glasses: 'Are you wearing glasses?', energy: 'How much is happening now?', voice: 'How loud is the voice now?'},
+  fr: {animal: `Quel est ton animal préféré${NBSP}?`, colour: `Quelle est ta couleur préférée${NBSP}?`, shirt: `La couleur de tes vêtements${NBSP}?`,
+       glasses: `Tu portes des lunettes${NBSP}?`, energy: `Ça bouge combien maintenant${NBSP}?`, voice: `Quel est le volume de la voix que j'entends${NBSP}?`},
+  nl: {animal: 'Wat is je lievelingsdier?', colour: 'Wat is je lievelingskleur?', shirt: 'Welke kleur hebben je kleren?',
+       glasses: 'Draag je een bril?', energy: 'Hoeveel gebeurt er nu?', voice: 'Hoe luid is de stem die ik nu hoor?'},
+};
+const VALUES = {
+  fr: {dog: 'chien', cat: 'chat', horse: 'cheval', rabbit: 'lapin', bird: 'oiseau', fish: 'poisson', lion: 'lion', elephant: 'éléphant', bear: 'ours',
+       monkey: 'singe', turtle: 'tortue', dinosaur: 'dinosaure', red: 'rouge', orange: 'orange', yellow: 'jaune', green: 'vert', blue: 'bleu',
+       purple: 'violet', pink: 'rose', brown: 'marron', black: 'noir', white: 'blanc', grey: 'gris', gray: 'gris', glasses: 'des lunettes', 'no glasses': 'pas de lunettes',
+       still: 'immobile', moving: 'en mouvement', 'very active': 'beaucoup de mouvement', quiet: 'basse', normal: 'normale', loud: 'forte'},
+  nl: {dog: 'hond', cat: 'kat', horse: 'paard', rabbit: 'konijn', bird: 'vogel', fish: 'vis', lion: 'leeuw', elephant: 'olifant', bear: 'beer',
+       monkey: 'aap', turtle: 'schildpad', dinosaur: 'dinosaurus', red: 'rood', orange: 'oranje', yellow: 'geel', green: 'groen', blue: 'blauw',
+       purple: 'paars', pink: 'roze', brown: 'bruin', black: 'zwart', white: 'wit', grey: 'grijs', gray: 'grijs', glasses: 'bril', 'no glasses': 'geen bril',
+       still: 'rustig', moving: 'in beweging', 'very active': 'veel beweging', quiet: 'zacht', normal: 'normaal', loud: 'luid'},
+};
+/* colour words as they agree with "clothes" (FR: masculine plural; NL: inflected adjective) */
+const CLOTHES = {
+  fr: {red: 'rouges', orange: 'orange', yellow: 'jaunes', green: 'verts', blue: 'bleus', purple: 'violets', pink: 'roses', brown: 'marron', black: 'noirs', white: 'blancs', grey: 'gris', gray: 'gris'},
+  nl: {red: 'rode', orange: 'oranje', yellow: 'gele', green: 'groene', blue: 'blauwe', purple: 'paarse', pink: 'roze', brown: 'bruine', black: 'zwarte', white: 'witte', grey: 'grijze', gray: 'grijze'},
+};
+/* The pipeline writes explanation sentences in English from a small set of templates (robotsees/xai.py,
+   perception/*.py). They are translated here; anything unknown stays English. */
+const EVIDENCE = {
+  en: [
+    [/^heard you say "(.*)"$/i, (m) => `heard you say “${m[1]}”`],
+  ],
+  fr: [
+    [/^heard you say "(.*)"$/i, (m) => `j'ai entendu «${NBSP}${m[1]}${NBSP}»`],
+    [/^heard an? (quiet|normal|loud) voice$/i, (m) => `j'ai entendu une voix ${({quiet: 'basse', normal: 'normale', loud: 'forte'})[m[1].toLowerCase()]}`],
+    [/^heard (little|some|lots of) sound$/i, (m) => `j'ai entendu ${({little: 'très peu de bruit', some: 'un peu de bruit', 'lots of': 'beaucoup de bruit'})[m[1].toLowerCase()]}`],
+    [/^saw something like glasses$/i, () => "j'ai vu quelque chose comme des lunettes"],
+    [/^saw no glasses$/i, () => "je n'ai pas vu de lunettes"],
+    [/^saw (\w+) clothes( \(a clue, not proof\))?$/i, (m) => `j'ai vu des vêtements ${CLOTHES.fr[m[1].toLowerCase()] || m[1]}${m[2] ? ' (un indice, pas une preuve)' : ''}`],
+    [/^saw (little|some|lots of) movement$/i, (m) => `j'ai vu ${({little: 'peu de mouvement', some: 'un peu de mouvement', 'lots of': 'beaucoup de mouvement'})[m[1].toLowerCase()]}`],
+    [/^saw a picture or toy that looks like an? (.+)$/i, (m) => `j'ai vu une image ou un jouet${NBSP}: ${valueText(m[1].toLowerCase())}`],
+  ],
+  nl: [
+    [/^heard you say "(.*)"$/i, (m) => `ik hoorde „${m[1]}”`],
+    [/^heard an? (quiet|normal|loud) voice$/i, (m) => `ik hoorde een ${({quiet: 'zachte', normal: 'normale', loud: 'luide'})[m[1].toLowerCase()]} stem`],
+    [/^heard (little|some|lots of) sound$/i, (m) => `ik hoorde ${({little: 'weinig', some: 'wat', 'lots of': 'veel'})[m[1].toLowerCase()]} geluid`],
+    [/^saw something like glasses$/i, () => 'ik zag iets dat op een bril lijkt'],
+    [/^saw no glasses$/i, () => 'ik zag geen bril'],
+    [/^saw (\w+) clothes( \(a clue, not proof\))?$/i, (m) => `ik zag ${CLOTHES.nl[m[1].toLowerCase()] || m[1]} kleren${m[2] ? ' (een aanwijzing, geen bewijs)' : ''}`],
+    [/^saw (little|some|lots of) movement$/i, (m) => `ik zag ${({little: 'weinig', some: 'wat', 'lots of': 'veel'})[m[1].toLowerCase()]} beweging`],
+    [/^saw a picture or toy that looks like an? (.+)$/i, (m) => `ik zag een plaatje of speelgoed: ${valueText(m[1].toLowerCase())}`],
+  ],
+};
+
+/* ================= helpers ================= */
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const fmt = (t) => { const s = Math.max(0, Math.floor((+t || 0) + 1e-6)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+function T(key, vars) {
+  const d = I18N[state.lang] || I18N.en;
+  let s = d[key] != null ? d[key] : I18N.en[key];
+  if (s == null) return key;
+  if (vars && typeof s === 'string') s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
+  return s;
+}
+const valueText = (v) => ((VALUES[state.lang] || {})[v] || v || '');
+const questionText = (k, def) => ((QUESTIONS[state.lang] || {})[k] || (QUESTIONS.en[k]) || (def && def.question) || k);
+const shortText = (k) => (T('short')[k] || k);
+const isKnown = (s) => !!s && !!s.certainty && s.certainty !== 'unknown';
+const remPx = () => parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+const reducedMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+/* index of the last element with t <= time, or -1 when there is none yet (never peek into the future) */
+function lastIndexAtOrBefore(arr, t, get) {
+  let lo = 0, hi = arr.length - 1, ans = -1;
+  while (lo <= hi) { const m = (lo + hi) >> 1; if (get(arr[m]) <= t + 1e-6) { ans = m; lo = m + 1; } else hi = m - 1; }
+  return ans;
+}
+
+/* does this system draw colour emoji? (the booth player may lack an emoji font) */
+const EMOJI_OK = (() => {
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 32;
+    const x = c.getContext('2d');
+    x.textBaseline = 'top'; x.font = '26px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+    x.fillText('\u{1F415}', 2, 2);
+    const d = x.getImageData(0, 0, 32, 32).data;
+    for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 40 && (Math.abs(d[i] - d[i + 1]) > 24 || Math.abs(d[i + 1] - d[i + 2]) > 24)) return true;
+    return false;
+  } catch (e) { return true; }
+})();
+
+/* ================= state ================= */
+const state = {
+  lang: 'en', visitors: [], visitorId: null, variant: 'clean', sensors: {camera: true, microphone: true},
+  t: 0, playing: false, rate: 1, highlight: null, card: false, chrome: true, caption: null, stage: null,
+  sayMode: 'default', sayText: null, sayAutoKey: null, loading: false, flash: null, sound: true,
+};
+let session = null;
+const cache = new Map();
+const failedFiles = new Set();
+const memo = {};
+const changed = (name, key) => { if (memo[name] === key) return false; memo[name] = key; return true; };
+const resetMemo = () => { for (const k of Object.keys(memo)) delete memo[k]; };
+
+/* live mode: the page shows the robot's current state from prototype/live/run_live.py */
+const live = {on: IS_LIVE, rev: 0, sig: '', down: false, pending: false, forgetting: false, timer: 0, ok: false};
+if (live.on) state.sensors = {camera: false, microphone: false};
+
+const cfgKey = (s = state.sensors) => (s.camera && s.microphone ? 'camera+microphone' : s.camera ? 'camera' : s.microphone ? 'microphone' : 'none');
+const dur = () => (session ? +session.duration || 0 : 0);
+const sidOf = () => (session ? (live.on ? 'live|' + live.rev : session.id + '|' + session.variant) : '');
+const currentVisitor = () => state.visitors.find((v) => v.id === state.visitorId) || null;
+const stepIndex = (t = state.t) => (session && session.timeline.length ? lastIndexAtOrBefore(session.timeline, t, (s) => s.t) : -1);
+const currentStep = () => { const i = stepIndex(); return i >= 0 ? session.timeline[i] : null; };
+const snapFor = (cfg, step = currentStep()) => (step && step.configs ? step.configs[cfg] || null : null);
+const frameIndex = (t = state.t) => (session && session.frames.length ? lastIndexAtOrBefore(session.frames, t, (f) => f.t) : -1);
+const atEnd = () => !!(session && session.timeline.length && state.t >= session.timeline[session.timeline.length - 1].t - 1e-6);
+const visitorLabel = (v) => {
+  if (!v) return '';
+  const m = /^Visitor\s+(.+)$/i.exec(v.label || '');
+  return m ? `${T('visitor')} ${m[1]}` : (v.label || v.id);
+};
+const variantAvailable = (v, variant) => !!(v && v.variants && v.variants[variant] && !failedFiles.has(v.variants[variant]));
+
+/* ================= the avatar: a pure function of the snapshot ================= */
+const HALO_PATH = (() => {
+  const cx = 196, cy = 200, pts = [];
+  for (let i = 0; i < 64; i++) {
+    const a = (i / 64) * Math.PI * 2;
+    const r = 150 + 7 * Math.sin(3 * a + 0.6) + 4 * Math.cos(5 * a);
+    pts.push(`${(cx + r * Math.cos(a)).toFixed(1)} ${(cy + r * Math.sin(a)).toFixed(1)}`);
+  }
+  return 'M' + pts.join('L') + 'Z';
+})();
+function topSensor(s) {
+  let best = null, v = 1e-6;
+  for (const [k, x] of Object.entries((s && s.clues) || {})) if (+x > v) { v = +x; best = k; }
+  return best;
+}
+/* Every drawn feature is one inferred slot. Certainty is drawn, never hidden:
+   colours keep their real hue (an outline + paper stripes say "only a guess"); other features fade with certainty;
+   dashed = guessing; a dashed "?" with the slot icon = don't know yet. A small eye/ear badge = the sense that found it. */
+function renderAvatar(snap, size, opts) {
+  opts = opts || {};
+  const S = (snap && snap.slots) || {};
+  const empty = {certainty: 'unknown', certainty_score: 0, clues: {}};
+  const get = (k) => S[k] || empty;
+  const A = (s) => 0.25 + 0.75 * clamp(+s.certainty_score || 0, 0, 1);
+  const op = (s) => A(s).toFixed(3);
+  const guess = (s) => s.certainty === 'guess';
+  const dash = (s, d = '11 7') => (guess(s) ? ` stroke-dasharray="${d}"` : '');
+  const mini = !!opts.mini;
+  const cx = 196;
+  const L = 'var(--av-line)', I = 'var(--av-ink)', M = 'var(--av-mark)', U = 'var(--av-unk)', P = 'var(--av-paper)';
+  const co = get('colour'), sh = get('shirt'), gl = get('glasses'), an = get('animal'), en = get('energy'), vo = get('voice');
+  const pose = isKnown(en) ? en.best : 'still';
+  const dy = pose === 'very active' ? -18 : 0;
+  const badges = [], ph = [];
+  const badge = (x, y, s, lx, ly) => {
+    const sensor = topSensor(s);
+    if (!sensor || mini || !SENSOR_ICON[sensor]) return;
+    const c = SENSOR_CLASS[sensor];
+    badges.push('<g class="av-badge">' +
+      (lx != null ? `<path d="M${x} ${y}L${lx} ${ly}" stroke="var(--${c})" stroke-width="3.5" stroke-linecap="round"/>` : '') +
+      `<circle cx="${x}" cy="${y}" r="20" fill="var(--${c})" stroke="${P}" stroke-width="4"/>` +
+      `<use href="#${SENSOR_ICON[sensor]}" x="${x - 14}" y="${y - 14}" width="28" height="28" style="color:var(--on-${c})"/></g>`);
+  };
+  const q = (x, y, r, iconId) => (mini ? '' :
+    `<g class="av-q"><circle cx="${x}" cy="${y}" r="${r}" fill="${P}" stroke="${U}" stroke-width="3" stroke-dasharray="5 5"/>` +
+    `<use href="#${iconId}" x="${(x - r * 0.56).toFixed(1)}" y="${(y - r * 0.56).toFixed(1)}" width="${(r * 1.12).toFixed(1)}" height="${(r * 1.12).toFixed(1)}" style="color:${U}"/>` +
+    `<circle cx="${(x + r * 0.74).toFixed(1)}" cy="${(y - r * 0.74).toFixed(1)}" r="${(r * 0.48).toFixed(1)}" fill="${U}"/>` +
+    `<text x="${(x + r * 0.74).toFixed(1)}" y="${(y - r * 0.74 + r * 0.23).toFixed(1)}" text-anchor="middle" font-size="${(r * 0.66).toFixed(1)}" class="av-txt" fill="${P}">?</text></g>`);
+  let out = '';
+
+  // favourite colour: a halo behind the figure, in the real colour
+  if (isKnown(co) && COLOURS[co.best]) {
+    const c = COLOURS[co.best];
+    const fo = {sure: 0.36, think: 0.3}[co.certainty] || 0.22;
+    const d = dash(co, '16 12');
+    const grow = (k) => `transform="translate(196 200) scale(${k}) translate(-196 -200)"`;
+    out += `<g class="av-colour"><path d="${HALO_PATH}" fill="${c}" fill-opacity="${fo}"/>` +
+      `<path d="${HALO_PATH}" fill="none" stroke="${c}" stroke-width="10"${d}/>` +
+      `<path d="${HALO_PATH}" ${grow(1.045)} fill="none" stroke="${M}" stroke-opacity=".45" stroke-width="2"${d}/>` +
+      (LIGHT_COLOURS.has(co.best) ? `<path d="${HALO_PATH}" ${grow(0.955)} fill="none" stroke="${M}" stroke-opacity=".3" stroke-width="2"${d}/>` : '') + '</g>';
+    badge(54, 200, co);
+  } else ph.push(q(56, 300, 24, 'i-palette'));
+
+  // floor shadow
+  out += `<ellipse cx="${cx}" cy="364" rx="${pose === 'very active' ? 54 : 76}" ry="${pose === 'very active' ? 8 : 11}" fill="var(--av-shadow)"/>`;
+
+  // companion animal on a soft disc (pale animals keep a silhouette)
+  if (isKnown(an)) {
+    const emoji = EMOJI_OK && ANIMAL_EMOJI[an.best];
+    out += `<g class="av-animal" opacity="${op(an)}"><ellipse cx="352" cy="370" rx="44" ry="7" fill="var(--av-shadow)"/>` +
+      `<circle cx="352" cy="316" r="50" fill="var(--av-disc)" stroke="${guess(an) ? M : 'var(--av-disc-line)'}" stroke-width="3"${dash(an, '9 7')}/>`;
+    out += emoji ? `<text x="352" y="341" text-anchor="middle" font-size="66" class="av-pet">${emoji}</text>`
+                 : `<text x="352" y="325" text-anchor="middle" font-size="25" class="av-txt" fill="${M}">${esc(an.best)}</text>`;
+    out += '</g>';
+    badge(398, 272, an);
+  } else ph.push(q(352, 318, 30, 'i-paw'));
+
+  // the figure (jumps when very active)
+  let fig = '';
+  fig += `<rect x="${cx - 27}" y="268" width="24" height="84" rx="12" fill="var(--av-limb)" stroke="${L}" stroke-width="4"/>`;
+  fig += `<rect x="${cx + 3}" y="268" width="24" height="84" rx="12" fill="var(--av-limb)" stroke="${L}" stroke-width="4"/>`;
+  fig += `<ellipse cx="${cx - 19}" cy="352" rx="19" ry="9" fill="var(--av-limb)" stroke="${L}" stroke-width="4"/>`;
+  fig += `<ellipse cx="${cx + 19}" cy="352" rx="19" ry="9" fill="var(--av-limb)" stroke="${L}" stroke-width="4"/>`;
+  // torso = clothes colour, always in its real colour
+  const torso = `M${cx - 46} 196Q${cx - 46} 174 ${cx - 24} 174L${cx + 24} 174Q${cx + 46} 174 ${cx + 46} 196L${cx + 52} 280Q${cx + 52} 292 ${cx + 40} 292L${cx - 40} 292Q${cx - 52} 292 ${cx - 52} 280Z`;
+  if (isKnown(sh) && COLOURS[sh.best]) {
+    fig += `<path d="${torso}" fill="${COLOURS[sh.best]}"/>`;
+    if (guess(sh)) fig += `<path d="${torso}" fill="url(#av-stripes)"/>`;
+    if (LIGHT_COLOURS.has(sh.best)) fig += `<path d="M${cx - 24} 244q6 18 0 38M${cx + 26} 240q-6 20 0 42" fill="none" stroke="var(--av-unk)" stroke-width="3" stroke-linecap="round" opacity=".75"/>`;
+    fig += `<path d="${torso}" fill="none" stroke="${L}" stroke-width="${sh.certainty === 'sure' ? 5.5 : 4}"${dash(sh, '13 7')}/>`;
+    fig += `<path d="M${cx - 15} 175Q${cx} 192 ${cx + 15} 175" fill="none" stroke="${L}" stroke-width="3.5" stroke-linecap="round"/>`;
+    badge(cx + 28, 262 + dy, sh);
+  } else {
+    fig += `<path d="${torso}" fill="${P}" stroke="${U}" stroke-width="3.5" stroke-dasharray="2 9" stroke-linecap="round"/>`;
+    fig += `<text x="${cx}" y="252" text-anchor="middle" font-size="46" class="av-txt" fill="${U}">?</text>`;
+  }
+  // arms (always opaque): still = down, moving = one arm waving, very active = both arms up
+  const arm = (d, hand) => `<path d="${d}" fill="none" stroke="${L}" stroke-width="25" stroke-linecap="round"/>` +
+    `<path d="${d}" fill="none" stroke="var(--av-limb)" stroke-width="17" stroke-linecap="round"/>` +
+    `<circle cx="${hand[0]}" cy="${hand[1]}" r="12" fill="var(--av-face)" stroke="${L}" stroke-width="4"/>`;
+  const downL = [`M${cx - 42} 194Q${cx - 64} 232 ${cx - 61} 266`, [cx - 61, 271]];
+  const downR = [`M${cx + 42} 194Q${cx + 64} 232 ${cx + 61} 266`, [cx + 61, 271]];
+  const upL = [`M${cx - 42} 194Q${cx - 86} 178 ${cx - 94} 128`, [cx - 95, 121]];
+  const upR = [`M${cx + 42} 194Q${cx + 86} 178 ${cx + 94} 128`, [cx + 95, 121]];
+  if (pose === 'very active') fig += arm(...upL) + arm(...upR);
+  else if (pose === 'moving') fig += arm(...downL) + arm(...upR);
+  else fig += arm(...downL) + arm(...downR);
+  // head with a calm, neutral face (no hair, no skin tone, no feelings guessed)
+  fig += `<circle cx="${cx}" cy="118" r="54" fill="var(--av-face)" stroke="${L}" stroke-width="4"/>`;
+  fig += `<circle cx="${cx - 18}" cy="114" r="6.5" fill="${I}"/><circle cx="${cx + 18}" cy="114" r="6.5" fill="${I}"/>`;
+  fig += `<path d="M${cx - 13} 142Q${cx} 146 ${cx + 13} 142" fill="none" stroke="${I}" stroke-width="4.5" stroke-linecap="round"/>`;
+  // glasses; "no glasses" is drawn only while the robot is not sure (a small crossed-out pair beside the head)
+  if (isKnown(gl) && gl.best === 'glasses') {
+    fig += `<g opacity="${op(gl)}" fill="none" stroke="${I}" stroke-width="4.5" stroke-linecap="round"${dash(gl, '6 5')}>` +
+      `<circle cx="${cx - 19}" cy="114" r="16" fill="var(--av-face)" fill-opacity=".25"/><circle cx="${cx + 19}" cy="114" r="16" fill="var(--av-face)" fill-opacity=".25"/>` +
+      `<path d="M${cx - 4} 111Q${cx} 106 ${cx + 4} 111M${cx - 35} 110L${cx - 52} 104M${cx + 35} 110L${cx + 52} 104"/></g>`;
+    badge(cx + 62, 84 + dy, gl);
+  } else if (isKnown(gl) && gl.certainty !== 'sure') {
+    fig += `<g opacity="${op(gl)}" fill="none" stroke="${M}" stroke-width="3.5" stroke-linecap="round"><g${dash(gl, '5 4')}>` +
+      `<circle cx="${cx + 63}" cy="86" r="9.5"/><circle cx="${cx + 86}" cy="86" r="9.5"/><path d="M${cx + 72} 84q2.5-2.5 5 0"/></g>` +
+      `<path d="M${cx + 56} 101L${cx + 93} 71"/></g>`;
+    badge(cx + 112, 64 + dy, gl);
+  } else if (!isKnown(gl)) ph.push(q(cx + 74, 86 + dy, 22, 'i-glasses'));
+  // energy: pose + motion marks (certainty fades the marks, never the arms)
+  if (isKnown(en)) {
+    const m = `fill="none" stroke="${M}" stroke-width="4" stroke-linecap="round" opacity="${op(en)}"${dash(en, '6 6')}`;
+    if (pose === 'moving') {
+      fig += `<path d="M${cx + 120} 104q12 14 0 30M${cx + 134} 92q19 25 0 52" ${m}/>`;
+      badge(cx + 152, 176 + dy, en);
+    } else if (pose === 'very active') {
+      fig += `<path d="M${cx + 120} 104q12 14 0 30M${cx - 120} 104q-12 14 0 30M${cx - 76} 222h-30M${cx - 70} 244h-42M${cx + 76} 222h30M${cx + 70} 244h42" ${m}/>`;
+      badge(cx + 152, 176 + dy, en);
+    } else {
+      badge(cx + 74, 328, en, cx + 42, 328);
+    }
+  } else ph.push(q(cx + 100, 240, 22, 'i-energy'));
+  out += `<g class="av-fig" transform="translate(0 ${dy})">${fig}</g>`;
+  if (pose === 'very active' && isKnown(en)) {
+    out += `<path d="M${cx - 48} 380h26M${cx - 8} 385h16M${cx + 22} 380h26" fill="none" stroke="${M}" stroke-width="4" stroke-linecap="round" opacity="${op(en)}"${dash(en, '6 6')}/>`;
+  }
+
+  // voice: a speech bubble (quiet = small "…", normal = "la la", loud = big "LA LA!")
+  const bubble = (x0, y0, w, h, r, tx, ty) => {
+    const b1 = x0 + w - 46, b2 = x0 + w - 22;
+    return `M${x0 + r} ${y0}H${x0 + w - r}Q${x0 + w} ${y0} ${x0 + w} ${y0 + r}V${y0 + h - r}Q${x0 + w} ${y0 + h} ${x0 + w - r} ${y0 + h}H${b2}L${tx} ${ty}L${b1} ${y0 + h}H${x0 + r}Q${x0} ${y0 + h} ${x0} ${y0 + h - r}V${y0 + r}Q${x0} ${y0} ${x0 + r} ${y0}Z`;
+  };
+  if (isKnown(vo)) {
+    const B = {quiet: [34, 42, 78, 44, '…', 30, 140, 108], normal: [12, 26, 118, 56, 'la la', 30, 140, 108], loud: [-6, 6, 132, 62, 'LA LA!', 31, 134, 94]}[vo.best] ||
+      [12, 26, 118, 56, esc(vo.best), 22, 140, 108];
+    const [x0, y0, w, h, txt, fs, tx, ty] = B;
+    out += `<g class="av-voice" opacity="${op(vo)}"><path d="${bubble(x0, y0, w, h, 18, tx, ty)}" fill="var(--av-face)" stroke="${L}" stroke-width="${vo.best === 'loud' ? 5 : 4}" stroke-linejoin="round"${dash(vo)}/>` +
+      `<text x="${x0 + w / 2}" y="${(y0 + h / 2 + fs * 0.36).toFixed(1)}" text-anchor="middle" font-size="${fs}" class="av-txt" fill="${I}">${txt}</text>`;
+    if (vo.best === 'loud') out += `<path d="M14 0l-7-10M52 -2l-1-11M90 -1l6-10" fill="none" stroke="${M}" stroke-width="4" stroke-linecap="round"/>`;
+    out += '</g>';
+    badge(x0 + w + 2, Math.max(12, y0 + 2), vo);
+  } else if (!mini) {
+    ph.push(`<g class="av-q"><path d="${bubble(40, 44, 70, 44, 16, 140, 108)}" fill="${P}" stroke="${U}" stroke-width="3" stroke-dasharray="5 5" stroke-linejoin="round"/>` +
+      `<use href="#i-voice" x="52" y="53" width="26" height="26" style="color:${U}"/><text x="94" y="77" text-anchor="middle" font-size="26" class="av-txt" fill="${U}">?</text></g>`);
+  }
+
+  // highlight ring (video / explanation focus) and short "this changed" rings after a switch flip
+  const ring = (slot, cls, w) => {
+    const a = `fill="none" stroke="var(--hl)" stroke-width="${w}" class="${cls}"`;
+    return ({
+      colour: `<path d="${HALO_PATH}" ${a}/>`,
+      shirt: `<rect x="${cx - 66}" y="${162 + dy}" width="132" height="142" rx="30" ${a}/>`,
+      glasses: `<ellipse cx="${cx + 20}" cy="${102 + dy}" rx="96" ry="44" ${a}/>`,
+      animal: `<circle cx="352" cy="316" r="60" ${a}/>`,
+      energy: `<ellipse cx="${cx}" cy="${206 + dy}" rx="142" ry="108" ${a}/>`,
+      voice: `<rect x="-12" y="-2" width="172" height="104" rx="26" ${a}/>`,
+    })[slot] || '';
+  };
+  let hl = '';
+  if (!mini && opts.flash) for (const k of opts.flash) if (k !== opts.highlight) hl += ring(k, 'av-flash', 7);
+  if (!mini && opts.highlight) hl += ring(opts.highlight, 'av-hl', 9);
+  const label = opts.label || '';
+  const dims = size ? ` width="${size}" height="${Math.round(size * 400 / 448)}"` : '';
+  return `<svg viewBox="-14 -14 448 400" preserveAspectRatio="xMidYMid meet"${dims} class="avatar${mini ? ' mini' : ''}" role="img" aria-label="${esc(label)}">` +
+    out + ph.join('') + badges.join('') + hl + '</svg>';
+}
+
+/* ================= small renderers ================= */
+const dots = (c) => {
+  const n = {sure: 3, think: 2, guess: 1}[c] || 0;
+  return `<span class="dots" aria-hidden="true"><b class="${n > 0 ? 'f' : ''}"></b><b class="${n > 1 ? 'f' : ''}"></b><b class="${n > 2 ? 'f' : ''}"></b></span>`;
+};
+const pillHTML = (c) => `<span class="pill c-${c}">${dots(c)}<span>${esc(T('cert_' + c))}</span></span>`;
+const icon = (id) => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+const slotKeys = () => (session ? SLOT_ORDER.filter((k) => session.slots[k]).concat(Object.keys(session.slots).filter((k) => !SLOT_ORDER.includes(k))) : SLOT_ORDER);
+
+function avatarAria(snap) {
+  if (!snap) return T('avatarLabel');
+  const parts = SLOT_ORDER.filter((k) => isKnown(snap.slots[k])).map((k) => `${shortText(k)}${T('colon')}${valueText(snap.slots[k].best)} (${T('cert_' + snap.slots[k].certainty)})`);
+  return `${T('avatarLabel')}. ${parts.join('; ')}`;
+}
+function avKeyHTML() {
+  const s = (inner) => `<svg viewBox="0 0 32 22" aria-hidden="true">${inner}</svg>`;
+  return `<span>${s('<rect x="3" y="3" width="26" height="16" rx="5" fill="none" stroke="var(--av-mark)" stroke-width="3.2"/>')}${esc(T('keySure'))}</span>` +
+    `<span>${s('<rect x="3" y="3" width="26" height="16" rx="5" fill="none" stroke="var(--av-mark)" stroke-width="2.6" stroke-dasharray="5.5 3.5" opacity=".8"/>')}${esc(T('keyGuess'))}</span>` +
+    `<span>${s('<circle cx="16" cy="11" r="8.6" fill="var(--av-paper)" stroke="var(--av-unk)" stroke-width="2.2" stroke-dasharray="3 3"/><text x="16" y="15.3" text-anchor="middle" font-size="12.5" font-weight="800" font-family="Baloo 2, sans-serif" fill="var(--av-unk)">?</text>')}${esc(T('keyUnknown'))}</span>`;
+}
+
+/* explanation lines: translated, measurement tails moved to a tooltip, the meaningless "best" of an unknown slot never shown */
+function splitDetail(text) {
+  const m = /^(.*?)\s*\(([^)]*\d[^)]*)\)\s*$/.exec(text);
+  if (!m) return {text, detail: ''};
+  const detail = m[2].replace(/(^|[^\d.])[-−]0(?:\.0+)?(?![\d.])/g, '$10').replace(/-(?=\d)/g, '−');
+  return {text: m[1], detail};
+}
+function trEvidence(text) {
+  for (const [rx, fn] of (EVIDENCE[state.lang] || [])) { const m = rx.exec(text); if (m) return fn(m); }
+  return text;
+}
+function trUnknown(raw) {
+  const m = /^I can't tell: my (eyes and ears|eyes|ears) (?:is|are) switched off\.?$/i.exec(raw);
+  if (m) return T(m[1].toLowerCase() === 'eyes' ? 'cantEyes' : m[1].toLowerCase() === 'ears' ? 'cantEars' : 'cantBoth');
+  if (/^I only have a tiny hint\b/i.test(raw)) return T('tinyHint');
+  if (/^I haven't noticed anything/i.test(raw)) return T('noticedNothing');
+  return raw.replace(/ that it might be [A-Z][A-Z ]*? - /, ' – ');
+}
+function trDisagree(raw) {
+  const m = /^My senses disagree: (.*?)\.\s*For this question I trust my (eyes|ears) more\.?$/i.exec(raw);
+  if (!m) return null;
+  const parts = m[1].split(/\s+but\s+/i).map((p) => {
+    const q = /my (eyes|ears) says? (.+)$/i.exec(p.trim());
+    return q ? `${T(q[1].toLowerCase() === 'eyes' ? 'eyes' : 'ears')}${T('colon')}${valueText(q[2].toLowerCase())}` : p;
+  });
+  return `${parts.join(' · ')}. ${T(m[2].toLowerCase() === 'eyes' ? 'trustEyes' : 'trustEars')}`;
+}
+function becauseLines(s) {
+  const ex = (s && s.explanation) || [];
+  if (!isKnown(s)) return ex.length ? [{sensor: null, muted: true, text: trUnknown(ex[0]), details: []}] : [];
+  const out = [];
+  for (const raw of ex.slice(1)) {
+    const m = /^Because my (eyes|ears) (.*?)\.?$/i.exec(raw);
+    if (m) {
+      const sensor = m[1].toLowerCase() === 'eyes' ? 'camera' : 'microphone';
+      const {text, detail} = splitDetail(m[2]);
+      const tr = trEvidence(text);
+      const prev = out.find((o) => o.sensor === sensor && o.text === tr);
+      if (prev) { if (detail) prev.details.push(detail); continue; }
+      out.push({sensor, text: tr, details: detail ? [detail] : []});
+      continue;
+    }
+    if (/^My (eyes|ears) are switched off/i.test(raw)) continue; // the clue bar already says "off"
+    const d = trDisagree(raw);
+    out.push({sensor: null, muted: true, text: d || raw, details: [], disagree: !!d});
+  }
+  return out;
+}
+
+function clueRow(sensor, s) {
+  const cls = SENSOR_CLASS[sensor] || 'eyes';
+  const name = sensor === 'camera' ? T('eyes') : T('ears');
+  if (!state.sensors[sensor]) {
+    const off = T('sensorOff_' + sensor);
+    return `<div class="clue s-${cls} off" title="${esc(name + T('colon') + off)}">${icon(SENSOR_ICON[sensor])}<div class="cbar"><span>${esc(off)}</span></div></div>`;
+  }
+  const v = +((s && s.clues && s.clues[sensor]) || 0);
+  const known = isKnown(s);
+  const w = (Math.min(Math.abs(v), CLUE_SCALE) / CLUE_SCALE) * 50;
+  let bar = '';
+  if (w > 0.3) {
+    if (!known) bar = `<i class="unk" style="left:${(50 - w / 2).toFixed(2)}%;width:${w.toFixed(2)}%"></i>`; // a hint, but for no named answer
+    else {
+      const style = v >= 0 ? `left:50%;width:${w.toFixed(2)}%` : `left:${(50 - w).toFixed(2)}%;width:${w.toFixed(2)}%`;
+      bar = `<i class="${v < 0 ? 'neg' : ''}${Math.abs(v) > CLUE_SCALE ? ' over' : ''}" style="${style}"></i>`;
+    }
+  }
+  const num = Math.abs(v) < 0.05 ? '0' : (v > 0 ? '+' : '−') + Math.abs(v).toFixed(1);
+  const tip = known ? `${name}${T('colon')}${num} ${T('cluePts')}` : `${name}${T('colon')}${T('noAnswer')}`;
+  return `<div class="clue s-${cls}" title="${esc(tip)}">${icon(SENSOR_ICON[sensor])}<div class="cbar">${bar}</div></div>`;
+}
+
+let cardSnap = null;
+function renderCards(maxBecause) {
+  const el = $('cards');
+  if (!session) return;
+  el.dataset.because = String(maxBecause);
+  el.innerHTML = slotKeys().map((k) => cardHTML(k, session.slots[k], cardSnap && cardSnap.slots[k], maxBecause)).join('');
+}
+function cardHTML(k, def, s, maxBecause) {
+  const sensors = (def && def.sensors) || [];
+  const dim = sensors.length > 0 && !sensors.some((x) => state.sensors[x]);
+  const known = isKnown(s);
+  const c = known ? s.certainty : 'unknown';
+  let needs = '';
+  if (dim) needs = sensors.length > 1 ? T('needsBoth') : sensors[0] === 'camera' ? T('needsEyes') : T('needsEars');
+  const all = dim && !isKnown(s) ? [] : becauseLines(s);
+  const dis = all.find((l) => l.disagree) || ((s && s.explanation) || []).some((l) => /disagree/i.test(l));
+  // order: strongest clue, then the disagreement (if any), then the other clues;
+  // with room for one line only, the disagreement wins (the clue bars already show the strongest clue)
+  const ev = all.filter((l) => !l.disagree), dl = all.filter((l) => l.disagree);
+  const ordered = maxBecause === 1 && dl.length ? dl.concat(ev) : ev.slice(0, 1).concat(dl, ev.slice(1));
+  const lines = ordered.slice(0, maxBecause).map((l) => {
+    const tip = ` title="${esc(l.text + (l.details && l.details.length ? ` (${l.details.join(', ')})` : ''))}"`;
+    return l.sensor
+      ? `<li class="s-${SENSOR_CLASS[l.sensor]}"${tip}><svg aria-hidden="true" style="color:var(--sc)"><use href="#${SENSOR_ICON[l.sensor]}"/></svg><span>${esc(l.text)}</span></li>`
+      : `<li class="muted solo${l.disagree ? ' dis' : ''}"${tip}><span>${esc(l.text)}</span></li>`;
+  }).join('');
+  const disTip = dis && dis.text ? ` title="${esc(dis.text)}"` : '';
+  const flash = state.flash && state.flash.slots.includes(k);
+  return `<article class="card${dim ? ' dim' : ''}${state.highlight === k ? ' hl' : ''}${flash ? ' changed' : ''}" id="card-${esc(k)}" data-slot="${esc(k)}">` +
+    `<div class="cq">${icon(SLOT_ICON[k] || 'i-paw')}<span>${esc(questionText(k, def))}</span></div>` +
+    `<div class="ans">${pillHTML(c)}${known ? `<span class="val">${esc(valueText(s.best))}</span>` : ''}${dim ? `<span class="needs">${esc(needs)}</span>` : ''}` +
+    `${dis ? `<span class="disagree"${disTip}>${icon('i-bolt')}${esc(T('disagree'))}</span>` : ''}</div>` +
+    `<div class="clues">${sensors.map((x) => clueRow(x, s)).join('')}</div>` +
+    (lines ? `<ul class="because">${lines}</ul>` : '') + '</article>';
+}
+
+function knowHTML(snap) {
+  const keys = slotKeys();
+  const sl = (snap && snap.slots) || {};
+  const known = keys.filter((k) => isKnown(sl[k])).length;
+  const sure = keys.filter((k) => sl[k] && sl[k].certainty === 'sure').length;
+  if (!known) return esc(T('know0'));
+  const tpl = known === 1 && (I18N[state.lang] || {}).know1 ? 'know1' : 'know';
+  let h = esc(T(tpl, {k: '\u0001', n: '\u0002'})).replace('\u0001', `<b>${known}</b>`).replace('\u0002', `<b>${keys.length}</b>`);
+  if (sure) h += esc(T('knowSure', {s: '\u0003'})).replace('\u0003', `<b class="sure-n">${sure}</b>`);
+  return h;
+}
+
+function irisSVG() {
+  let s = '<svg class="iris" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49" fill="var(--dog-visor)"/>';
+  for (let i = 0; i < 6; i++) {
+    s += `<path d="M50 50C58 34 52 18 50 6A44 44 0 0 1 88.1 28C78.71 35.73 67.86 48.93 50 50Z" transform="rotate(${i * 60} 50 50)" fill="var(${i % 2 ? '--iris-a' : '--iris-b'})" stroke="var(--dog-visor)" stroke-width="1.4" stroke-linejoin="round"/>`;
+  }
+  return s + '<circle cx="50" cy="50" r="44.5" fill="none" stroke="var(--iris-ring)" stroke-width="3"/></svg>';
+}
+
+/* ================= render: whole screen from state ================= */
+function renderStatic() {
+  document.documentElement.lang = state.lang;
+  document.querySelectorAll('[data-i18n]').forEach((el) => { const v = T(el.dataset.i18n); if (typeof v === 'string') el.textContent = v; });
+  document.querySelectorAll('.lang button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
+  $('never-list').innerHTML = T('never').map((n, i) =>
+    `<li title="${esc(n[2] || n[1])}"><svg class="ni" viewBox="0 0 24 24" aria-hidden="true"><use href="#${['i-n-who', 'i-n-feel', 'i-n-age', 'i-n-origin', 'i-n-health', 'i-n-head'][i]}"/>` +
+    `<path class="slash-bg" d="M4 4l16 16"/><path class="slash" d="M4 4l16 16"/></svg><p><b>${esc(n[0])}.</b> <span class="nb">${esc(n[1])}</span></p></li>`).join('');
+  $('av-key').innerHTML = avKeyHTML();
+  $('clue-key').title = T('keyBars');
+  $('dog-t').textContent = T('dogLabel');
+  $('frame-img').alt = T('frameAlt');
+  $('imag-img').alt = T('imagAlt');
+  $('scrubber').setAttribute('aria-label', T('time'));
+  const sel = $('visitor-select');
+  state.visitors.forEach((v, i) => { if (sel.options[i]) sel.options[i].textContent = visitorLabel(v); });
+}
+
+function renderControls() {
+  const s = state.sensors, v = currentVisitor();
+  const setSw = (el, on) => { el.classList.toggle('on', on); el.setAttribute('aria-checked', String(on)); const st = el.querySelector('.sw-state'); if (st) st.textContent = on ? T('on') : T('off'); };
+  setSw($('sw-eyes'), s.camera);
+  setSw($('sw-ears'), s.microphone);
+  for (const id of ['sw-eyes', 'sw-ears']) {
+    const el = $(id);
+    el.disabled = live.on && (live.pending || live.forgetting);
+    el.classList.toggle('busy', live.on && live.pending);
+    el.setAttribute('aria-busy', String(live.on && live.pending));
+  }
+  for (const [k, variant] of Object.entries(TROUBLE)) {
+    const el = $('sw-' + k), avail = variantAvailable(v, variant);
+    el.disabled = !avail;
+    el.title = avail ? '' : T('unavailable');
+    setSw(el, state.variant === variant);
+  }
+  if (state.visitorId) $('visitor-select').value = state.visitorId;
+  const pb = $('btn-play');
+  pb.innerHTML = icon(state.playing ? 'i-pause' : 'i-play');
+  pb.setAttribute('aria-label', state.playing ? T('pause') : T('play'));
+  $('btn-finish').setAttribute('aria-pressed', String(state.card));
+  const sb = $('btn-sound');
+  sb.hidden = live.on || !voiceSrcFor(v, state.variant);
+  sb.setAttribute('aria-pressed', String(state.sound));
+  sb.innerHTML = icon(state.sound ? 'i-sound' : 'i-mute') + `<span class="snd-txt">${esc(T('voice'))}</span>`;
+  sb.title = T(state.sound ? 'voiceOn' : 'voiceOff');
+  sb.setAttribute('aria-label', T(state.sound ? 'voiceOn' : 'voiceOff'));
+  // status badges (visible when the console is hidden)
+  $('st-eyes').classList.toggle('off', !s.camera);
+  $('st-ears').classList.toggle('off', !s.microphone);
+  $('st-eyes-v').textContent = s.camera ? T('on') : T('off');
+  $('st-ears-v').textContent = s.microphone ? T('on') : T('off');
+  const cond = state.variant === 'foggy-eyes' ? ['i-fog', T('fog')] : state.variant === 'noisy-ears' ? ['i-noise', T('noise')] : null;
+  const sc = $('st-cond');
+  sc.hidden = !cond;
+  if (cond) sc.innerHTML = icon(cond[0]) + `<span>${esc(cond[1])}</span>`;
+  $('st-vis').textContent = visitorLabel(v);
+  $('st-load').hidden = !state.loading;
+  if (live.on) $('live-note').textContent = T(s.camera || s.microphone ? 'liveNoteOn' : 'liveNote');
+  // the robot dog mirrors the switches
+  const dog = $('dog');
+  dog.classList.toggle('eyes-off', !s.camera);
+  dog.classList.toggle('ears-off', !s.microphone);
+  dog.classList.toggle('foggy', state.variant === 'foggy-eyes');
+  dog.classList.toggle('noisy', state.variant === 'noisy-ears');
+  const app = $('app');
+  app.classList.toggle('no-chrome', !state.chrome);
+  app.classList.toggle('has-stage', !!state.stage);
+  renderSay();
+}
+
+function renderSay() {
+  const el = $('dog-say');
+  let text = null;
+  if (state.sayMode === 'auto') text = T(state.sayAutoKey);
+  else if (state.sayMode === 'api') text = state.sayText;
+  else text = T('sayHello');
+  const hide = text == null || text === '';
+  let moved = false;
+  if (el.hidden !== hide) { el.hidden = hide; moved = true; }
+  if (!hide && el.textContent !== text) { el.textContent = text; moved = true; }
+  if (moved) {
+    // a longer or shorter bubble changes the senses column: re-fit (once, after the current render)
+    delete memo.fit;
+    queueMicrotask(() => { if (memo.fit === undefined && session) renderData(); });
+  }
+}
+
+function renderTime() {
+  if (!session) return;
+  const d = dur();
+  if (!live.on) {
+    const sc = $('scrubber');
+    if (+sc.max !== d) sc.max = String(d);
+    if (document.activeElement !== sc || state.playing) sc.value = String(state.t);
+    sc.style.setProperty('--pct', (d ? (state.t / d) * 100 : 0).toFixed(2) + '%');
+    $('time-label').innerHTML = `${fmt(state.t)} <span>/ ${fmt(d)}</span>`;
+  }
+  $('st-time').textContent = fmt(state.t);
+  renderData();
+}
+
+function renderData() {
+  if (!session) return;
+  let dirty = memo.fit === undefined;
+  const ch = (name, key) => { const c = changed(name, key); if (c) dirty = true; return c; };
+  const sid = sidOf();
+  const cfg = cfgKey();
+  const si = stepIndex();
+  const step = si >= 0 ? session.timeline[si] : null;
+  const snap = snapFor(cfg, step);
+  const L = state.lang;
+  const cam = state.sensors.camera, mic = state.sensors.microphone;
+  cardSnap = snap;
+
+  // words from the robot's list heard so far
+  const audio = session.audio || [];
+  let win = null, wi = -1;
+  audio.forEach((a, i) => { if (+a.t1 <= state.t + 1e-6) { win = a; wi = i; } });
+  const kws = [];
+  audio.forEach((a) => (a.keywords || []).forEach((k) => { if (+k.t <= state.t + 1e-6) kws.push(k); }));
+
+  // scrubber ticks: only words already heard, only while the ears are on
+  if (!live.on && changed('ticks', [sid, mic, kws.length].join('|'))) {
+    const d = dur() || 1;
+    $('ticks').innerHTML = mic ? kws.map((k) => `<i style="left:${clamp((k.t / d) * 100, 0, 100).toFixed(2)}%"></i>`).join('') : '';
+  }
+
+  // ---- eyes panel
+  const fi = frameIndex();
+  if (ch('eyes', [sid, cam, fi, L].join('|'))) {
+    $('panel-eyes').classList.toggle('off', !cam);
+    $('eyes-onoff').textContent = cam ? T('on') : T('off');
+    $('eyes-cond').classList.toggle('show', !!(session.conditions && session.conditions.camera_degrade > 0));
+    const f = fi >= 0 ? session.frames[fi] : null;
+    let src = null;
+    for (let i = fi; i >= 0 && i >= fi - 20; i--) if (session.frames[i].img) { src = session.frames[i].img; break; }
+    const img = $('frame-img');
+    if (cam && src) { if (img.getAttribute('src') !== src) img.src = src; }
+    else if (img.getAttribute('src')) img.removeAttribute('src');
+    $('lens').classList.toggle('empty', !src);
+    $('eyes-info').classList.toggle('nopic', !f);
+    if (!$('iris-slot').firstChild) $('iris-slot').innerHTML = irisSVG();
+    if (f) {
+      $('ro-person').innerHTML = `<span class="dot${f.person ? '' : ' no'}"></span><span>${esc(f.person ? T('personYes') : T('personNo'))}</span>`;
+      const qv = clamp(+f.quality || 0, 0, 1);
+      $('ro-qbar').style.width = (qv * 100).toFixed(0) + '%';
+      $('ro-q').textContent = (qv * 100).toFixed(0) + '%';
+      const ok = Array.isArray(f.swatch) && f.swatch.length === 3;
+      const rgb = ok ? f.swatch.map((x) => clamp(+x | 0, 0, 255)) : null;
+      $('ro-swatch').innerHTML = ok ? `<span class="swatch" style="background:rgb(${rgb.join(',')})" title="rgb ${rgb.join(' ')}"></span>` : `<span class="none">${esc(T('nothing'))}</span>`;
+    } else {
+      $('ro-person').innerHTML = `<span class="dot no"></span><span>${esc(T('noPicture'))}</span>`;
+    }
+  }
+
+  // ---- ears panel
+  if (ch('ears', [sid, mic, wi, kws.length, cfg, si, L].join('|'))) {
+    $('panel-ears').classList.toggle('off', !mic);
+    $('ears-onoff').textContent = mic ? T('on') : T('off');
+    $('ears-cond').classList.toggle('show', !!(session.conditions && session.conditions.audio_snr != null));
+    const groups = new Map();
+    for (const k of kws) {
+      const key = String(k.value || '').toLowerCase();
+      const g = groups.get(key) || {value: key, canon: k.canon, slot: k.slot, n: 0, first: +k.t, last: 0};
+      g.n++; g.last = Math.max(g.last, +k.t); groups.set(key, g);
+    }
+    chipGroups = [...groups.values()].sort((a, b) => a.first - b.first);
+    paintChips(2);
+    const db = win && win.loudness_db != null ? +win.loudness_db : null;
+    const zi = db == null ? -1 : db < LOUD.quietMax ? 0 : db > LOUD.loudMin ? 2 : 1;
+    $('meter').querySelectorAll('.zone').forEach((z, i) => z.classList.toggle('act', i === zi));
+    const needle = $('needle');
+    needle.style.display = db == null ? 'none' : '';
+    if (db != null) needle.style.left = (((clamp(db, LOUD.lo, LOUD.hi) - LOUD.lo) / (LOUD.hi - LOUD.lo)) * 100).toFixed(2) + '%';
+    const lv = $('loud-val');
+    lv.textContent = !win ? T('listening') : db == null ? T('noVoice') : T(['zQuiet', 'zNormal', 'zLoud'][zi]);
+    lv.title = db == null ? '' : `${db > 0 ? '+' : db < 0 ? '−' : ''}${Math.abs(db).toFixed(1)} dB`;
+  }
+
+  // ---- avatar, summary, cards
+  const hl = state.highlight;
+  const fl = state.flash ? state.flash.id : 0;
+  if (ch('stage', [sid, cfg, si, hl, L, fl].join('|'))) {
+    $('avatar').innerHTML = renderAvatar(snap, null, {highlight: hl, flash: state.flash && !reducedMotion() ? state.flash.slots : null, label: avatarAria(snap)});
+    $('know').innerHTML = knowHTML(snap);
+    $('pips').innerHTML = slotKeys().map((k) => {
+      const s = snap && snap.slots[k];
+      const c = isKnown(s) ? s.certainty : 'unknown';
+      return `<span class="pip c-${c}" title="${esc(shortText(k) + T('colon') + T('cert_' + c))}">${icon(SLOT_ICON[k] || 'i-paw')}</span>`;
+    }).join('');
+    const sh = (snap && snap.summary && snap.summary.sensor_share) || {};
+    const ce = +sh.camera || 0, cm = +sh.microphone || 0, tot = ce + cm;
+    const bar = $('share-bar').children;
+    bar[0].style.width = (tot ? (ce / tot) * 100 : 0).toFixed(1) + '%';
+    bar[1].style.width = (tot ? (cm / tot) * 100 : 0).toFixed(1) + '%';
+    $('share-leg').innerHTML = tot
+      ? `<span class="e">${icon('i-eye')}${esc(T('eyes'))} ${Math.round((ce / tot) * 100)}%</span><span class="a">${esc(T('ears'))} ${Math.round((cm / tot) * 100)}%${icon('i-ear')}</span>`
+      : `<span style="color:var(--ink-2)">${esc(T('noClues'))}</span>`;
+    renderCards(2);
+  }
+
+  // ---- imagination: drawn from the END of the visit, so it only appears there
+  const end = atEnd();
+  if (ch('imag', [sid, cfg, L, end].join('|'))) {
+    const im = session.imagination && session.imagination[cfg];
+    const fig = $('imag');
+    const show = !!(im && im.img && end);
+    fig.hidden = !show;
+    if (show) {
+      $('imag-img').src = im.img;
+      const words = (im.words || []).filter(Boolean);
+      $('imag-cap').innerHTML = `${esc(T('imagCaption'))} <b>${words.length ? words.map((w) => '“' + esc(w) + '”').join(', ') : esc(T('imagNoWords'))}</b>. ${esc(T('imagMay'))}`;
+      const gen = String(im.generator || '');
+      $('imag-gen').textContent = gen ? `${T('imagMade')} ${gen.split(/\s*[(,]/)[0]}` : '';
+      fig.title = gen;
+    }
+  }
+
+  // ---- what if: the same moment under the four sensor settings
+  if (ch('whatif', [sid, cfg, si, L].join('|'))) {
+    const n = slotKeys().length;
+    for (const c of CONFIGS) {
+      const el = $(c.id), sn = snapFor(c.key, step);
+      el.setAttribute('aria-pressed', String(c.key === cfg));
+      const sg = `<span class="wi-sg">` +
+        `<span class="sg ${c.s.camera ? 'on-eyes' : 'off'}">${icon('i-eye')}</span><span class="sg ${c.s.microphone ? 'on-ears' : 'off'}">${icon('i-ear')}</span></span>`;
+      el.querySelector('.wi-av').innerHTML = renderAvatar(sn, null, {mini: true, label: T(c.label)}) + sg;
+      const k = sn ? slotKeys().filter((x) => isKnown(sn.slots[x])).length : 0;
+      const kEl = el.querySelector('.wi-k');
+      kEl.innerHTML = `<b>${k}</b>/${n}`;
+      kEl.title = T('knowsShort', {k, n});
+      el.setAttribute('aria-label', `${T(c.label)}: ${T('knowsShort', {k, n})}`);
+    }
+  }
+
+  if (state.card && changed('card', [sid, cfg, si, L, end].join('|'))) renderCard(snap);
+  if (dirty) { memo.fit = 1; fitLayout(); }
+}
+
+/* word chips: as many as fit in maxRows rows; the words that decided an answer are kept, the least important go into "+N" */
+let chipGroups = [];
+function paintChips(maxRows) {
+  const all = chipGroups, el = $('chips');
+  const snap = cardSnap;
+  const isAns = (g) => { const s = snap && snap.slots && snap.slots[g.slot]; return isKnown(s) && s.best === g.canon; };
+  const chipHTML = (g) => `<span class="chip${isAns(g) ? ' ans' : ''}">${icon(SLOT_ICON[g.slot] || 'i-paw')}<span>“${esc(g.value)}”</span>` +
+    `${g.canon && String(g.canon).toLowerCase() !== g.value ? `<span class="to">→ ${esc(valueText(g.canon))}</span>` : ''}` +
+    `${g.n > 1 ? `<span class="n">×${g.n}</span>` : ''}</span>`;
+  const paint = (list) => {
+    el.innerHTML = list.length ? list.map(chipHTML).join('') + (all.length > list.length ? `<span class="chip more">+${all.length - list.length}</span>` : '')
+      : `<span class="none">${esc(T('noWords'))}</span>`;
+  };
+  let shown = all.slice();
+  paint(shown);
+  const first = el.firstElementChild, rowH = first ? first.offsetHeight : 0;
+  if (!rowH || !shown.length) return;
+  const gap = parseFloat(getComputedStyle(el).rowGap) || 0;
+  const maxH = rowH * maxRows + gap * (maxRows - 1) + 2;
+  while (shown.length > 1 && el.offsetHeight > maxH) {
+    const victim = shown.slice().sort((a, b) => (isAns(a) - isAns(b)) || (a.n - b.n) || (a.last - b.last))[0];
+    shown = shown.filter((g) => g !== victim);
+    paint(shown);
+  }
+}
+
+/* One-screen layout: when a column would overflow (short laptop windows, French/Dutch, long captions), give way in a fixed
+   order - the picture shrinks, word chips drop to one row, "because" lines go from 2 to 1, the promises keep only their
+   titles, then no "because" lines. If it still does not fit, the page scrolls rather than overlapping.
+   Deterministic for a given window, language and caption. */
+const over = (el) => !!el && el.scrollHeight > el.clientHeight + 1;
+function fitLayout() {
+  const app = $('app'), sn = $('senses'), right = $('right'), mid = document.querySelector('.mid'), nv = $('never'), cards = $('cards');
+  const stacked = window.matchMedia('(max-width: 1239px)').matches;
+  if (stacked || app.classList.contains('scroll')) {
+    sn.classList.remove('tight'); sn.style.removeProperty('--lens-h'); nv.classList.remove('compact');
+    if (cards.dataset.because !== '2') renderCards(2);
+    return;
+  }
+  // 1. senses column
+  sn.classList.remove('tight');
+  sn.style.setProperty('--lens-h', LENS_MAX + 'rem');
+  if (state.sensors.microphone) paintChips(2);
+  if (over(sn)) {
+    sn.classList.add('tight');
+    const o = (sn.scrollHeight - sn.clientHeight) / remPx();
+    if (o > 0) sn.style.setProperty('--lens-h', Math.max(LENS_MIN, LENS_MAX - o - 0.1).toFixed(2) + 'rem');
+    if (over(sn) && state.sensors.microphone) paintChips(1);
+  }
+  // 2. reasons column: first layout that fits, in order of preference [because lines, promises as titles only]
+  for (const [n, compact] of [[2, false], [1, false], [1, true], [0, false], [0, true]]) {
+    nv.classList.toggle('compact', compact);
+    if (cards.dataset.because !== String(n)) renderCards(n);
+    if (!over(right)) break;
+  }
+  // 3. last resort
+  if (over(sn) || over(right) || over(mid)) {
+    app.classList.add('scroll');
+    fitLayout();
+  }
+}
+function refit() {
+  $('app').classList.remove('scroll');
+  delete memo.fit; delete memo.ears; delete memo.stage;
+  renderData();
+}
+
+function renderCard(snap) {
+  const date = new Intl.DateTimeFormat(state.lang === 'en' ? 'en-GB' : state.lang, {day: 'numeric', month: 'long', year: 'numeric'}).format(new Date());
+  $('ks-date').textContent = date;
+  const im = session && session.imagination && session.imagination[cfgKey()];
+  $('ks-pic').innerHTML = renderAvatar(snap, null, {mini: true, label: avatarAria(snap)});
+  $('ks-imag-slot').innerHTML = im && im.img && atEnd()
+    ? `<figure class="ks-imag" title="${esc(im.generator || '')}"><img src="${im.img}" alt="${esc(T('imagAlt'))}"><figcaption>${esc(T('cardImag'))}</figcaption></figure>` : '';
+  const facts = snap ? SLOT_ORDER.filter((k) => isKnown(snap.slots[k]))
+    .sort((a, b) => (+snap.slots[b].certainty_score || 0) - (+snap.slots[a].certainty_score || 0)).slice(0, 3) : [];
+  $('ks-facts').innerHTML = facts.length
+    ? facts.map((k) => { const s = snap.slots[k]; return `<li>${pillHTML(s.certainty)}<span>${esc(shortText(k) + T('colon'))}<b>${esc(valueText(s.best))}</b></span></li>`; }).join('')
+    : `<li class="ks-none">${esc(T('cardNoFacts'))}</li>`;
+}
+
+function renderAll() {
+  renderControls();
+  renderTime();
+}
+
+/* ================= loading (replay) ================= */
+async function fetchJSON(url) {
+  const r = await fetch(url, {cache: 'no-cache'});
+  if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`);
+  return r.json();
+}
+function normaliseSession(s) {
+  s = s || {};
+  s.frames = (s.frames || []).filter((f) => f && isFinite(+f.t)).slice().sort((a, b) => a.t - b.t);
+  s.timeline = (s.timeline || []).filter((x) => x && x.configs && isFinite(+x.t)).slice().sort((a, b) => a.t - b.t);
+  s.audio = (s.audio || []).filter(Boolean);
+  s.slots = s.slots && Object.keys(s.slots).length ? s.slots : DEFAULT_SLOTS;
+  return s;
+}
+const DEFAULT_SLOTS = {
+  animal: {sensors: ['camera', 'microphone']}, colour: {sensors: ['camera', 'microphone']}, shirt: {sensors: ['camera']},
+  glasses: {sensors: ['camera']}, energy: {sensors: ['camera', 'microphone']}, voice: {sensors: ['microphone']},
+};
+function getSession(file) {
+  if (failedFiles.has(file)) return Promise.reject(new Error(`sessions/${file}: not available`));
+  if (!cache.has(file)) {
+    const p = fetchJSON('sessions/' + file).then(normaliseSession);
+    p.catch(() => { cache.delete(file); failedFiles.add(file); if (session) renderControls(); });   // its switch shows "not available" at once
+    cache.set(file, p);
+  }
+  return cache.get(file);
+}
+function fatal(title, msg, detail) {
+  $('fatal-title').textContent = title;
+  $('fatal-msg').textContent = msg;
+  $('fatal-detail').textContent = detail || '';
+  $('fatal').hidden = false;
+}
+let loadToken = 0;
+async function load(visitorId, variant, opts) {
+  if (live.on) throw new Error('load() is not available in live mode');
+  variant = variant || 'clean';
+  const v = state.visitors.find((x) => x.id === visitorId);
+  if (!v) throw new Error(`Unknown visitor "${visitorId}"`);
+  const file = v.variants && v.variants[variant];
+  if (!file) throw new Error(`Variant "${variant}" is not available for ${visitorId}`);
+  const token = ++loadToken;
+  state.loading = true; renderControls();
+  let s;
+  try { s = await getSession(file); }
+  catch (e) {
+    if (token === loadToken) state.loading = false;
+    if (!session) { if (!(opts && opts.quiet)) fatal(T('loadError'), location.protocol === 'file:' ? T('fileError') : String(e.message || e), file); }
+    else autoSay('sayMissing');      // keep showing the current visitor; the switch for that file is now disabled
+    renderControls();
+    throw e;
+  }
+  if (token !== loadToken) return getState();
+  const sameVisitor = state.visitorId === visitorId;
+  clearTimeout(flashTimer); state.flash = null;   // "this changed" rings belong to the previous recording
+  session = s;
+  state.visitorId = visitorId;
+  state.variant = variant;
+  state.loading = false;
+  if (sameVisitor) state.t = clamp(state.t, 0, dur());
+  else { pause(); state.t = dur(); }
+  setVoiceSrc(voiceSrcFor(v, variant));   // a noisy room also sounds noisy: that is what the robot heard
+  renderAll();
+  syncVoice();
+  prefetch(v);
+  return getState();
+}
+function prefetch(v) {
+  setTimeout(() => { Object.values(v.variants || {}).forEach((f) => { if (!failedFiles.has(f)) getSession(f).catch(() => {}); }); }, 600);
+}
+const variantOrder = (v) => ['clean'].concat(Object.keys(v.variants || {}).filter((x) => x !== 'clean')).filter((x) => variantAvailable(v, x));
+
+/* ================= the visitor's voice (original recording; replay mode only) ================= */
+const voiceEl = $('voice');
+const SOUND_KEY = 'robotsees-voice';
+try { if (localStorage.getItem(SOUND_KEY) === '0') state.sound = false; } catch (e) { /* storage may be blocked */ }
+const voiceSrcFor = (v, variant) => (v && v.audio ? v.audio[variant] || v.audio.clean || null : null);
+/* clips are small: load each one into memory once, so it is always seekable (any web server) */
+const voiceBlobs = new Map();
+function setVoiceSrc(src) {
+  src = src || '';
+  voiceEl.dataset.want = src;
+  if ((voiceEl.dataset.cur || '') === src) return;
+  voiceEl.pause();
+  const use = (url) => {
+    if (voiceEl.dataset.want !== src) return;           // another clip was asked for meanwhile
+    voiceEl.dataset.cur = src;
+    if (url) voiceEl.src = url; else voiceEl.removeAttribute('src');
+    voiceEl.load();
+  };
+  if (!src) return use('');
+  if (voiceBlobs.has(src)) return use(voiceBlobs.get(src));
+  fetch(src).then((r) => (r.ok ? r.blob() : Promise.reject(new Error('HTTP ' + r.status))))
+    .then((b) => { const u = URL.createObjectURL(b); voiceBlobs.set(src, u); use(u); })
+    .catch(() => use(src));                              // fall back to streaming the file
+}
+const voiceUsable = () => !live.on && state.sound && !!voiceEl.dataset.cur;
+/* the recording is the clock while it plays, so picture and voice stay together */
+function syncVoice() {
+  if (!voiceUsable() || !state.playing) { if (!voiceEl.paused) voiceEl.pause(); return; }
+  if (voiceEl.readyState >= 1 && Math.abs(voiceEl.currentTime - state.t) > 0.25) { try { voiceEl.currentTime = state.t; } catch (e) { /* not seekable yet */ } }
+  voiceEl.playbackRate = state.rate || 1;
+  if (voiceEl.paused && state.t < (voiceEl.duration || Infinity) - 0.05) voiceEl.play().catch(() => {});
+}
+voiceEl.addEventListener('loadedmetadata', () => syncVoice());
+function toggleSound() {
+  state.sound = !state.sound;
+  try { localStorage.setItem(SOUND_KEY, state.sound ? '1' : '0'); } catch (e) { /* ignore */ }
+  renderControls();
+  syncVoice();
+}
+
+/* ================= playback ================= */
+let raf = 0, lastTs = 0;
+function tick(ts) {
+  if (!state.playing) return;
+  const dt = lastTs ? Math.min(0.25, (ts - lastTs) / 1000) : 0;
+  lastTs = ts;
+  let next = state.t + dt * state.rate;
+  if (voiceUsable() && !voiceEl.paused && !voiceEl.seeking && voiceEl.readyState >= 2) {
+    const a = voiceEl.currentTime;                       // the recording is the clock while it agrees with the screen
+    if (Math.abs(a - next) < 0.6) next = a;
+    else { try { voiceEl.currentTime = next; } catch (e) { /* not seekable */ } }
+  }
+  state.t = Math.min(dur(), Math.max(0, next));
+  if (state.t >= dur()) { state.playing = false; voiceEl.pause(); renderControls(); }
+  renderTime();
+  if (state.playing) raf = requestAnimationFrame(tick);
+}
+function play(rate) {
+  if (!session || live.on) return;
+  state.rate = rate > 0 ? +rate : 1;
+  if (state.t >= dur() - 0.05) state.t = 0;
+  state.playing = true;
+  lastTs = 0;
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(tick);
+  syncVoice();
+  renderControls(); renderTime();
+}
+function pause() {
+  state.playing = false;
+  voiceEl.pause();
+  cancelAnimationFrame(raf);
+  renderControls();
+}
+function seek(t) {
+  if (live.on) return state.t;
+  state.t = clamp(+t || 0, 0, dur());
+  if (state.playing && voiceUsable()) { try { voiceEl.currentTime = state.t; } catch (e) { /* not seekable yet */ } }
+  renderTime();
+  return state.t;
+}
+
+/* ================= sensors + talking ================= */
+let sayTimer = 0, flashTimer = 0, flashId = 0;
+function setSensors(next) {
+  next = next || {};
+  if (live.on) return liveSetSensors(next, false);
+  if (typeof next.camera === 'boolean') state.sensors.camera = next.camera;
+  if (typeof next.microphone === 'boolean') state.sensors.microphone = next.microphone;
+  renderAll();
+  return {...state.sensors};
+}
+function autoSay(key) {
+  clearTimeout(sayTimer);
+  const prev = state.sayMode === 'auto' ? state.sayPrev : state.sayMode;
+  state.sayPrev = prev || 'default';
+  state.sayMode = 'auto'; state.sayAutoKey = key;
+  renderSay();
+  sayTimer = setTimeout(() => { state.sayMode = state.sayPrev || 'default'; renderSay(); }, 5000);
+}
+function sayForChange(b, a) {
+  if (a.camera === b.camera && a.microphone === b.microphone) return;
+  let key;
+  if (!a.camera && !a.microphone) key = 'sayBothOff';
+  else if (b.camera && !a.camera) key = 'sayEyesOff';
+  else if (b.microphone && !a.microphone) key = 'sayEarsOff';
+  else if (!b.camera && !b.microphone && a.camera && a.microphone) key = 'sayBothOn';
+  else if (!b.camera && a.camera) key = 'sayEyesOn';
+  else key = 'sayEarsOn';
+  autoSay(key);
+}
+/* after a switch flip, briefly ring the answers that appeared, vanished or changed */
+function flashChanges(before, after) {
+  const sig = (s) => (isKnown(s) ? s.best + '|' + s.certainty : '-');
+  const slots = slotKeys().filter((k) => sig(before && before.slots[k]) !== sig(after && after.slots[k]));
+  clearTimeout(flashTimer);
+  state.flash = slots.length ? {slots, id: ++flashId} : null;
+  if (state.flash) flashTimer = setTimeout(() => { state.flash = null; renderData(); }, 1800);
+}
+function userSetSensors(next) {
+  if (live.on) { liveSetSensors(next, true); return; }
+  const b = {...state.sensors};
+  const before = snapFor(cfgKey(b));
+  const a = {camera: typeof next.camera === 'boolean' ? next.camera : b.camera, microphone: typeof next.microphone === 'boolean' ? next.microphone : b.microphone};
+  if (a.camera === b.camera && a.microphone === b.microphone) return;
+  flashChanges(before, snapFor(cfgKey(a)));
+  setSensors(a);
+  sayForChange(b, a);
+}
+function userTrouble(kind) {
+  const variant = TROUBLE[kind];
+  const v = currentVisitor();
+  if (!v || !variantAvailable(v, variant)) return;
+  const prev = state.variant;
+  const target = prev === variant ? 'clean' : variant;
+  if (!variantAvailable(v, target)) return;
+  load(v.id, target).then(() => {
+    let key;
+    if (target === 'clean') key = kind === 'fog' ? 'sayFogOff' : 'sayNoiseOff';
+    else if (prev === TROUBLE.fog) key = 'sayFogToNoise';      // the two troubles never come together: say so
+    else if (prev === TROUBLE.noise) key = 'sayNoiseToFog';
+    else key = kind === 'fog' ? 'sayFog' : 'sayNoise';
+    autoSay(key);
+  }).catch(() => {});
+}
+
+/* ================= live mode ================= */
+function setLiveDown(down) {
+  live.down = down;
+  $('live-msg').hidden = !down;
+}
+function applyLive(raw) {
+  const s = normaliseSession(raw);
+  s.id = 'live'; s.variant = 'live';
+  const last = s.timeline[s.timeline.length - 1];
+  const lf = s.frames[s.frames.length - 1];
+  const en = s.enabled || {};
+  const sig = [last ? JSON.stringify(last.configs) : '', lf ? lf.t + ':' + (lf.img ? lf.img.length : 0) : '', s.frames.length, s.audio.length, +!!en.camera, +!!en.microphone].join('|');
+  if (sig !== live.sig) { live.sig = sig; live.rev++; }
+  session = s;
+  state.t = Math.max(+s.duration || 0, last ? +last.t : 0);
+  if (!live.pending && s.enabled) state.sensors = {camera: !!en.camera, microphone: !!en.microphone};
+  renderAll();
+}
+async function livePoll() {
+  clearTimeout(live.timer);
+  if (live.inflight) { live.again = true; return; }
+  live.inflight = true;
+  if (!live.forgetting) {
+    try {
+      const r = await fetch('live/session.json', {cache: 'no-store'});
+      if (!r.ok) throw new Error(`live/session.json: HTTP ${r.status}`);
+      const j = await r.json();
+      if (!live.forgetting) applyLive(j);
+      setLiveDown(false);
+    } catch (e) { setLiveDown(true); }
+  }
+  live.inflight = false;
+  if (live.again) { live.again = false; return livePoll(); }
+  live.timer = setTimeout(livePoll, LIVE_POLL_MS);
+}
+async function livePost(path, body) {
+  const r = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body || {}), cache: 'no-store'});
+  if (!r.ok) throw new Error(`${path}: HTTP ${r.status}`);
+  return r.json();
+}
+/* the switch does not move until the robot confirms: what you see is what the robot really uses */
+async function liveSetSensors(next, user) {
+  if (live.pending || live.forgetting) return {...state.sensors};
+  const body = {};
+  for (const k of ['camera', 'microphone']) if (typeof next[k] === 'boolean' && next[k] !== state.sensors[k]) body[k] = next[k];
+  if (!Object.keys(body).length) return {...state.sensors};
+  const before = {...state.sensors};
+  live.pending = true; renderControls();
+  try {
+    const j = await livePost('live/sensors', body);
+    if (j && j.enabled) state.sensors = {camera: !!j.enabled.camera, microphone: !!j.enabled.microphone};
+    setLiveDown(false);
+  } catch (e) { setLiveDown(true); }
+  live.pending = false;
+  renderAll();
+  if (user) sayForChange(before, state.sensors);
+  livePoll();
+  return {...state.sensors};
+}
+async function liveForget() {
+  if (!live.on || live.forgetting) return;
+  live.forgetting = true;
+  if (state.card) showCard(false);
+  $('forgot').hidden = false;
+  $('dog').classList.add('sleep');
+  renderControls();
+  try { await livePost('live/forget', {}); setLiveDown(false); } catch (e) { setLiveDown(true); }
+  chipGroups = [];
+  session = normaliseSession({id: 'live', variant: 'live', duration: 0, live: true});
+  state.t = 0; live.rev++;
+  renderAll();
+  await new Promise((res) => setTimeout(res, 2600));
+  $('forgot').hidden = true;
+  $('dog').classList.remove('sleep');
+  live.forgetting = false; live.sig = '';
+  renderControls();
+  livePoll();
+}
+
+/* ================= API helpers ================= */
+function setLang(code) {
+  code = String(code || '').toLowerCase();
+  if (!I18N[code]) throw new Error(`Unknown language "${code}" (use en, fr or nl)`);
+  state.lang = code;
+  resetMemo();
+  renderStatic();
+  $('app').classList.remove('scroll');
+  renderAll();
+  return code;
+}
+function setCaption(text) {
+  state.caption = text == null || text === '' ? null : String(text);
+  const el = $('caption'), host = document.body;
+  el.hidden = state.caption == null;
+  el.textContent = state.caption || '';
+  if (state.caption) {
+    // keep the caption off the panels: reserve its height (at least two lines, so the layout does not jump between captions)
+    const rem = remPx();
+    const h = Math.max(el.offsetHeight, rem * (1.6 * 1.3 * 2 + 1.25)) + rem * 1.1 + rem * 0.3;
+    host.style.setProperty('--cap-reserve', Math.round(h) + 'px');
+  } else host.style.removeProperty('--cap-reserve');
+  refit();
+}
+function setStage(title, subtitle) {
+  state.stage = title == null || title === '' ? null : {title: String(title), subtitle: subtitle == null ? '' : String(subtitle)};
+  const el = $('stage-ov');
+  el.hidden = !state.stage;
+  if (state.stage) {
+    $('stage-title').textContent = state.stage.title;
+    $('stage-sub').textContent = state.stage.subtitle;
+    el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  }
+  renderControls();
+}
+function robotSay(text) {
+  clearTimeout(sayTimer);
+  state.sayMode = 'api';
+  state.sayText = text == null ? null : String(text);
+  renderSay();
+}
+function highlightSlot(slot) {
+  if (slot != null && !(session && session.slots[slot]) && !SLOT_ORDER.includes(slot)) throw new Error(`Unknown slot "${slot}"`);
+  state.highlight = slot || null;
+  renderData();
+}
+let cardOpener = null;
+function showCard(on, fromUser) {
+  state.card = !!on;
+  $('endcard').hidden = !state.card;
+  if (state.card) { delete memo.card; renderData(); }
+  renderControls();
+  if (state.card && fromUser) { cardOpener = document.activeElement; $('card-close').focus({preventScroll: true}); }
+  else if (!state.card && cardOpener) { try { cardOpener.focus({preventScroll: true}); } catch (e) { /* gone */ } cardOpener = null; }
+}
+function setChrome(on) {
+  state.chrome = !!on;
+  renderControls();
+  refit();
+}
+function getState() {
+  const v = currentVisitor();
+  const snap = session ? snapFor(cfgKey()) : null;
+  const slots = {};
+  if (snap) for (const k of Object.keys(snap.slots)) {
+    const s = snap.slots[k];
+    slots[k] = {value: isKnown(s) ? s.best : null, certainty: s.certainty, score: s.certainty_score};
+  }
+  return {
+    live: live.on, liveConnected: live.on ? !live.down : null,
+    visitorId: live.on ? null : state.visitorId, visitorLabel: v && !live.on ? v.label : null, variant: live.on ? 'live' : state.variant,
+    variants: v && !live.on ? Object.keys(v.variants || {}) : [], visitors: state.visitors.map((x) => x.id),
+    sensors: {...state.sensors}, config: cfgKey(), t: +state.t.toFixed(3), duration: dur(),
+    playing: state.playing, rate: state.rate, lang: state.lang, highlight: state.highlight,
+    card: state.card, chrome: state.chrome, caption: state.caption, stage: state.stage,
+    robotSay: $('dog-say').hidden ? null : $('dog-say').textContent,
+    imagination: !$('imag').hidden, layout: $('app').classList.contains('scroll') ? 'scroll' : 'fit',
+    fit: {tight: $('senses').classList.contains('tight'), lens: $('senses').style.getPropertyValue('--lens-h') || null,
+          because: +$('cards').dataset.because, neverCompact: $('never').classList.contains('compact')},
+    summary: snap ? snap.summary : null, slots,
+  };
+}
+
+/* ================= wiring ================= */
+function wire() {
+  $('sw-eyes').addEventListener('click', () => userSetSensors({camera: !state.sensors.camera}));
+  $('sw-ears').addEventListener('click', () => userSetSensors({microphone: !state.sensors.microphone}));
+  $('sw-fog').addEventListener('click', () => userTrouble('fog'));
+  $('sw-noise').addEventListener('click', () => userTrouble('noise'));
+  $('visitor-select').addEventListener('change', (e) => {
+    const v = state.visitors.find((x) => x.id === e.target.value);
+    const order = v ? variantOrder(v) : [];
+    if (!order.length) { renderControls(); return; }
+    load(v.id, order[0]).catch(() => renderControls());
+  });
+  $('btn-play').addEventListener('click', () => (state.playing ? pause() : play(state.rate || 1)));
+  $('scrubber').addEventListener('input', (e) => seek(+e.target.value));
+  $('btn-finish').addEventListener('click', () => showCard(!state.card, true));
+  $('btn-sound').addEventListener('click', toggleSound);
+  $('btn-forget').addEventListener('click', () => liveForget());
+  $('card-forget').addEventListener('click', () => liveForget());
+  $('card-close').addEventListener('click', () => showCard(false));
+  $('endcard').addEventListener('click', (e) => { if (e.target === e.currentTarget) showCard(false); });
+  document.querySelectorAll('.lang button').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.lang)));
+  CONFIGS.forEach((c) => $(c.id).addEventListener('click', () => userSetSensors(c.s)));
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key;
+    if (state.card) { if (k === 'Escape') { e.preventDefault(); showCard(false); } return; }   // the card is modal
+    if (live.forgetting) return;
+    const t = e.target, tag = (t && t.tagName || '').toLowerCase();
+    if (tag === 'select' || tag === 'textarea' || (tag === 'input' && t.type !== 'range')) return;
+    const onButton = !!(t && t.closest && t.closest('button, [role="switch"]'));
+    if (k === 'e' || k === 'E') { e.preventDefault(); userSetSensors({camera: !state.sensors.camera}); }
+    else if (k === 'h' || k === 'H') { e.preventDefault(); userSetSensors({microphone: !state.sensors.microphone}); }
+    else if ((k === ' ' || k === 'Spacebar') && !onButton) { e.preventDefault(); if (!e.repeat && !live.on) (state.playing ? pause() : play(state.rate || 1)); }
+    else if ((k === 'ArrowLeft' || k === 'ArrowRight') && !live.on) { e.preventDefault(); seek(state.t + (k === 'ArrowLeft' ? -1 : 1)); }
+    else if ((k === 'm' || k === 'M') && !live.on) { e.preventDefault(); toggleSound(); }
+  });
+  let resizeTimer = 0;
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { if (state.caption) setCaption(state.caption); else refit(); }, 150); });
+  window.addEventListener('hashchange', () => { if (/^#live\b/i.test(location.hash) !== live.on) location.reload(); });
+}
+
+async function initLive() {
+  const app = $('app');
+  app.classList.add('live');
+  $('live-badge').hidden = false;
+  session = normaliseSession({id: 'live', variant: 'live', duration: 0, live: true});
+  state.t = 0;
+  renderAll();
+  await livePoll();
+  return getState();
+}
+
+async function init() {
+  wire();
+  renderStatic();
+  if (live.on) return initLive();
+  renderControls();
+  if (location.protocol === 'file:') {
+    fatal(I18N.en.loadError, I18N.en.fileError, 'Run the command in the demo folder, then open http://localhost:8000/local.html. A page opened as a file (file://) is not allowed to read the session files.');
+    throw new Error('Opened from file:// - serve the folder over HTTP.');
+  }
+  let idx;
+  try { idx = await fetchJSON('sessions/index.json'); }
+  catch (e) { fatal(I18N.en.loadError, I18N.en.fileError, String(e && e.message || e)); throw e; }
+  state.visitors = (idx.visitors || []).filter((v) => v && v.id && v.variants && Object.keys(v.variants).length);
+  if (!state.visitors.length) { fatal(I18N.en.loadError, 'sessions/index.json lists no visitors.'); throw new Error('No visitors'); }
+  $('visitor-select').innerHTML = state.visitors.map((v) => `<option value="${esc(v.id)}">${esc(visitorLabel(v))}</option>`).join('');
+  // first visitor that loads (a missing file must not take the whole screen down)
+  let lastErr = null;
+  for (const v of state.visitors) {
+    for (const variant of variantOrder(v)) {
+      try { await load(v.id, variant, {quiet: true}); lastErr = null; break; } catch (e) { lastErr = e; }
+    }
+    if (session) break;
+  }
+  if (!session) { fatal(I18N.en.loadError, I18N.en.fileError, String(lastErr && lastErr.message || lastErr)); throw lastErr || new Error('No session'); }
+  state.t = dur();
+  renderAll();
+  return getState();
+}
+
+const ready = init();
+ready.catch((e) => console.warn('[demo] not ready:', e && e.message || e));
+
+window.demo = {
+  ready,
+  load: (visitorId, variant = 'clean') => load(visitorId, variant),
+  setSensors, seek, play: (rate = 1) => play(rate), pause, getState,
+  setCaption, setStage, robotSay, highlightSlot, showCard: (on) => showCard(on), setLang, setChrome,
+  renderAvatar,
+};
+})();
+</script>
+
+</body>
+</html>

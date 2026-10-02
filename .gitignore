@@ -1,0 +1,17 @@
+# local environment and re-downloadable bulk (see DATA.md)
+/.venv/
+/data/
+/models/
+/scratch/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# render / test by-products
+/prototype/video/out/_frames/
+/prototype/video/out/_*.wav
+/prototype/demo/_shots/*
+!/prototype/demo/_shots/final-*.png
+*.part

@@ -1,0 +1,289 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1300" viewBox="0 0 1600 1300" font-family="Segoe UI, Arial, sans-serif">
+  <style>
+    .title { font-size: 30px; font-weight: 700; fill: #1f2430; }
+    .sub { font-size: 17px; fill: #5b6170; }
+    .lane { font-size: 18px; font-weight: 700; fill: #1f2430; letter-spacing: 0.5px; }
+    .lanesub { font-size: 15px; fill: #5b6170; }
+    .h { font-size: 16px; font-weight: 700; fill: #1f2430; }
+    .b { font-size: 14px; fill: #1f2430; }
+    .s { font-size: 13px; fill: #5b6170; }
+    .m { font-size: 13px; fill: #5b6170; font-style: italic; }
+    .wh { font-size: 15px; font-weight: 700; fill: #ffffff; }
+    .ws { font-size: 13px; fill: #dfe4ec; }
+    .eyes { fill: none; stroke: #2f7de1; stroke-width: 3; }
+    .ears { fill: none; stroke: #f08a24; stroke-width: 3; }
+    .core { fill: none; stroke: #3b4252; stroke-width: 2.5; }
+    .ctrl { fill: none; stroke: #7d8696; stroke-width: 2.5; }
+    .opt { fill: none; stroke: #3b4252; stroke-width: 2.5; stroke-dasharray: 7 5; }
+    .stop { fill: none; stroke: #a33a3a; stroke-width: 3; }
+  </style>
+  <defs>
+    <marker id="aE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2f7de1"/></marker>
+    <marker id="aA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f08a24"/></marker>
+    <marker id="aC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3b4252"/></marker>
+    <marker id="aG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d8696"/></marker>
+    <marker id="aR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a33a3a"/></marker>
+  </defs>
+
+  <rect width="1600" height="1300" fill="#f6f8fb"/>
+
+  <!-- ===== Header ===== -->
+  <text x="40" y="50" class="title">How does a robot see you? Technical architecture</text>
+  <text x="40" y="80" class="sub">The robot is a thin sensor node. All AI runs on the offline stand laptop. Nothing goes to the cloud.</text>
+
+  <!-- Legend -->
+  <line x1="1000" y1="36" x2="1040" y2="36" class="eyes"/><text x="1048" y="41" class="s">eyes path (camera)</text>
+  <line x1="1000" y1="64" x2="1040" y2="64" class="ears"/><text x="1048" y="69" class="s">ears path (microphone)</text>
+  <line x1="1215" y1="36" x2="1255" y2="36" class="core"/><text x="1263" y="41" class="s">evidence and outputs</text>
+  <line x1="1215" y1="64" x2="1255" y2="64" class="ctrl"/><text x="1263" y="69" class="s">control and commands</text>
+  <rect x="1428" y="27" width="36" height="20" rx="4" fill="#ffffff" stroke="#3b4252" stroke-width="2" stroke-dasharray="6 4"/><text x="1472" y="41" class="s">optional part</text>
+  <line x1="1428" y1="64" x2="1464" y2="64" class="stop"/><text x="1472" y="69" class="s">staff e-stop</text>
+
+  <!-- ===== Lane 1: robot ===== -->
+  <rect x="20" y="100" width="1560" height="356" rx="14" fill="#f4efe4" stroke="#d8ccb4" stroke-width="1.5"/>
+  <text x="40" y="130" class="lane">ON THE ROBOT</text>
+  <text x="185" y="130" class="lanesub">SunFounder PiDog V2 + Raspberry Pi 5: capture and stream only, no AI</text>
+
+  <!-- sensors -->
+  <rect x="40" y="182" width="280" height="60" rx="8" fill="#ffffff" stroke="#2f7de1" stroke-width="2.5"/>
+  <text x="56" y="207" class="h">Camera 5 MP (eyes)</text>
+  <text x="56" y="229" class="s">+ physical lens shutter</text>
+
+  <rect x="40" y="256" width="280" height="60" rx="8" fill="#ffffff" stroke="#f08a24" stroke-width="2.5"/>
+  <text x="56" y="281" class="h">Close-talk mic (ears)</text>
+  <text x="56" y="303" class="s">hand-held "dog-bone", hardware mute</text>
+
+  <rect x="40" y="324" width="280" height="50" rx="8" fill="#ffffff" stroke="#7d8696" stroke-width="2"/>
+  <text x="56" y="345" class="h">Sound direction, 3 mics</text>
+  <text x="56" y="365" class="s">angle only (in the V2 kit: to confirm)</text>
+
+  <rect x="40" y="382" width="280" height="66" rx="8" fill="#ffffff" stroke="#7d8696" stroke-width="2"/>
+  <text x="56" y="406" class="h">Ultrasonic · touch · IMU</text>
+  <text x="56" y="427" class="s">cues and safety only,</text>
+  <text x="56" y="442" class="s">not evidence for the 6 slots</text>
+
+  <!-- Raspberry Pi -->
+  <rect x="380" y="146" width="480" height="302" rx="10" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="396" y="170" class="h">Raspberry Pi 5 (on the robot)</text>
+
+  <rect x="396" y="186" width="172" height="180" rx="8" fill="#fff6d5" stroke="#b59a3c" stroke-width="1.5"/>
+  <text x="410" y="210" class="h">Source-side gate</text>
+  <text x="410" y="234" class="b">EYES/EARS OFF =</text>
+  <text x="410" y="254" class="b">capture process</text>
+  <text x="410" y="274" class="b">stopped, shutter</text>
+  <text x="410" y="294" class="b">closed: no data</text>
+  <text x="410" y="314" class="b">leaves the robot</text>
+  <text x="410" y="338" class="s">all OFF at start-up</text>
+  <text x="410" y="356" class="s">and on heartbeat loss</text>
+
+  <rect x="588" y="192" width="258" height="40" rx="6" fill="#eef4fd" stroke="#2f7de1" stroke-width="1.5"/>
+  <text x="602" y="217" class="b">Picamera2 → MJPEG :9000</text>
+  <rect x="588" y="266" width="258" height="40" rx="6" fill="#fef3e8" stroke="#f08a24" stroke-width="1.5"/>
+  <text x="602" y="291" class="b">mic → 16 kHz PCM, WebSocket</text>
+  <rect x="588" y="326" width="258" height="40" rx="6" fill="#eceef2" stroke="#3b4252" stroke-width="1.5"/>
+  <text x="602" y="351" class="b">commands: gate, poses, LEDs, voice</text>
+  <rect x="588" y="395" width="258" height="40" rx="6" fill="#f1f2f5" stroke="#7d8696" stroke-width="1.5"/>
+  <text x="602" y="420" class="b">sensor + capture-state JSON</text>
+
+  <!-- sensor arrows -->
+  <line x1="320" y1="212" x2="394" y2="212" class="eyes" marker-end="url(#aE)"/>
+  <line x1="320" y1="286" x2="394" y2="286" class="ears" marker-end="url(#aA)"/>
+  <line x1="568" y1="212" x2="586" y2="212" class="eyes" marker-end="url(#aE)"/>
+  <line x1="568" y1="286" x2="586" y2="286" class="ears" marker-end="url(#aA)"/>
+  <line x1="588" y1="346" x2="570" y2="346" class="ctrl" marker-end="url(#aG)"/>
+  <line x1="320" y1="349" x2="394" y2="349" class="ctrl" marker-end="url(#aG)"/>
+  <line x1="320" y1="415" x2="586" y2="415" class="ctrl" marker-end="url(#aG)"/>
+
+  <!-- hardening -->
+  <rect x="890" y="186" width="260" height="124" rx="8" fill="#fbf9f4" stroke="#9aa3b2" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="906" y="210" class="h">Hardening</text>
+  <text x="906" y="232" class="s">fresh OS image, our code only</text>
+  <text x="906" y="254" class="s">vendor apps, cloud and BLE off</text>
+  <text x="906" y="276" class="s">default passwords changed</text>
+  <text x="906" y="298" class="s">firewall: talks to the laptop only</text>
+
+  <!-- robot body -->
+  <rect x="1180" y="146" width="380" height="302" rx="10" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1196" y="170" class="h">Robot body (what children see)</text>
+  <text x="1196" y="202" class="b">speaker: the robot's voice</text>
+  <text x="1196" y="228" class="b">servos: sit, stand, head turns</text>
+  <text x="1196" y="254" class="b">no walking among children</text>
+  <text x="1196" y="280" class="b">RGB light bar: real capture state</text>
+  <text x="1196" y="306" class="b">sits in a pen at child eye height</text>
+  <text x="1196" y="372" class="s">2 units: one is a hot spare</text>
+  <text x="1196" y="394" class="s">power: USB-C tether or rotated battery packs</text>
+
+  <line x1="846" y1="346" x2="1178" y2="346" class="ctrl" marker-end="url(#aG)"/>
+  <text x="1013" y="337" class="s" text-anchor="middle">drives the body</text>
+
+  <!-- staff e-stop -->
+  <rect x="890" y="364" width="260" height="80" rx="8" fill="#fbefef" stroke="#a33a3a" stroke-width="2.5"/>
+  <text x="906" y="386" class="h" style="fill:#a33a3a">Staff e-stop (staff side)</text>
+  <text x="906" y="406" class="s">wired to the Pi: servos relax,</text>
+  <text x="906" y="422" class="s">capture stops, session wiped;</text>
+  <text x="906" y="438" class="s">works without laptop or router</text>
+  <line x1="1150" y1="404" x2="1178" y2="404" class="stop" marker-end="url(#aR)"/>
+  <line x1="890" y1="404" x2="862" y2="404" class="stop" marker-end="url(#aR)"/>
+
+  <!-- ===== Booth network ===== -->
+  <text x="40" y="514" font-size="14" font-weight="700" fill="#3b4252">BOOTH NETWORK</text>
+  <line x1="620" y1="450" x2="620" y2="482" class="core" marker-start="url(#aC)" marker-end="url(#aC)"/>
+  <text x="634" y="474" class="s">↓ video, audio, sensor + capture-state JSON     ↑ switch commands, heartbeat, poses, LEDs, voice audio</text>
+
+  <rect x="380" y="484" width="480" height="48" rx="10" fill="#3b4252"/>
+  <text x="620" y="504" class="wh" text-anchor="middle">Dedicated 5 GHz travel router: local only, no internet</text>
+  <text x="620" y="523" class="ws" text-anchor="middle">wired Gigabit Ethernet as fallback</text>
+
+  <!-- ===== Lane 2: laptop ===== -->
+  <rect x="20" y="552" width="1560" height="594" rx="14" fill="#e8f0f9" stroke="#b7c8de" stroke-width="1.5"/>
+  <text x="560" y="584" class="lane">ON THE STAND LAPTOP</text>
+  <text x="784" y="584" class="lanesub">offline: no internet, outbound blocked · RAM only, nothing on disk</text>
+
+  <!-- router to laptop routes -->
+  <polyline points="380,496 336,496 336,780 324,780" class="ctrl" marker-start="url(#aG)" marker-end="url(#aG)"/>
+  <polyline points="380,520 362,520 362,881 378,881" class="ears" marker-end="url(#aA)"/>
+  <line x1="500" y1="532" x2="500" y2="614" class="eyes" marker-end="url(#aE)"/>
+  <polyline points="1445,616 1445,508 862,508" class="ctrl" marker-end="url(#aG)"/>
+  <text x="1150" y="500" class="s" text-anchor="middle">poses, LEDs and voice audio for the robot</text>
+
+  <!-- col 0 -->
+  <rect x="40" y="616" width="280" height="76" rx="8" fill="#fff6d5" stroke="#3b4252" stroke-width="2"/>
+  <text x="56" y="640" class="h">Switch box (USB buttons)</text>
+  <text x="56" y="662" class="s">EYES · EARS · foggy lens · noisy room</text>
+  <text x="56" y="680" class="s">forget me · language flags</text>
+  <line x1="180" y1="692" x2="180" y2="712" class="core" marker-end="url(#aC)"/>
+
+  <rect x="40" y="714" width="280" height="150" rx="8" fill="#ffffff" stroke="#7d8696" stroke-width="2"/>
+  <text x="56" y="738" class="h">Session controller</text>
+  <text x="56" y="762" class="b">15-min module, 2-3 rounds</text>
+  <text x="56" y="784" class="b">sends EYES/EARS to the gate,</text>
+  <text x="56" y="806" class="b">reads the real capture state</text>
+  <text x="56" y="832" class="s">wipes each round: forget me,</text>
+  <text x="56" y="850" class="s">handover, timeout, ABORT, e-stop</text>
+
+  <rect x="40" y="880" width="280" height="190" rx="8" fill="#ffffff" stroke="#b7c8de" stroke-width="1.5"/>
+  <text x="56" y="904" class="h">What lives where</text>
+  <text x="56" y="930" class="b">camera frame: RAM, &lt; 2 s</text>
+  <text x="56" y="954" class="b">audio: RAM, one answer</text>
+  <text x="56" y="978" class="b">transcript: dropped at once</text>
+  <text x="56" y="1002" class="b">observations: one round (~3 min)</text>
+  <text x="56" y="1026" class="b">face / voice embeddings: never</text>
+  <text x="56" y="1050" class="b">disk: nothing</text>
+
+  <!-- preprocessing -->
+  <rect x="380" y="616" width="240" height="140" rx="8" fill="#ffffff" stroke="#2f7de1" stroke-width="2.5"/>
+  <text x="396" y="640" class="h">Preprocess: eyes</text>
+  <text x="396" y="666" class="b">frame sampling: 2 fps</text>
+  <text x="396" y="690" class="b">ROI: volunteer mat only</text>
+  <text x="396" y="714" class="b">foggy lens: blur, dark, noise</text>
+  <text x="396" y="740" class="s">backup: webcam with a shutter</text>
+
+  <rect x="380" y="806" width="240" height="150" rx="8" fill="#ffffff" stroke="#f08a24" stroke-width="2.5"/>
+  <text x="396" y="830" class="h">Preprocess: ears</text>
+  <text x="396" y="856" class="b">Silero VAD: speech parts</text>
+  <text x="396" y="880" class="b">noisy room: babble mix</text>
+  <text x="396" y="904" class="b">language from flag button</text>
+  <text x="396" y="932" class="s">backup: wired mic with a mute</text>
+
+  <!-- models -->
+  <rect x="670" y="616" width="330" height="190" rx="8" fill="#ffffff" stroke="#2f7de1" stroke-width="2.5"/>
+  <text x="686" y="640" class="h">Eyes models</text>
+  <text x="686" y="666" class="b">MediaPipe face detector + pose</text>
+  <text x="686" y="690" class="b">CLIP ViT-B/32 + Platt scaling:</text>
+  <text x="686" y="714" class="b">glasses (head crop), animal card</text>
+  <text x="686" y="738" class="b">k-means (CIELAB): 11 colours</text>
+  <text x="686" y="762" class="b">movement right now (keypoints)</text>
+  <text x="686" y="790" class="m">dev CPU: 250-450 ms per frame</text>
+
+  <rect x="670" y="826" width="330" height="150" rx="8" fill="#ffffff" stroke="#f08a24" stroke-width="2.5"/>
+  <text x="686" y="850" class="h">Ears models</text>
+  <text x="686" y="876" class="b">faster-whisper (multilingual)</text>
+  <text x="686" y="900" class="b">+ closed lexicon, 5 languages</text>
+  <text x="686" y="924" class="b">loudness vs booth calibration</text>
+  <text x="686" y="954" class="m">dev CPU: 2.3 s per answer</text>
+
+  <line x1="620" y1="686" x2="668" y2="686" class="eyes" marker-end="url(#aE)"/>
+  <line x1="620" y1="881" x2="668" y2="881" class="ears" marker-end="url(#aA)"/>
+
+  <!-- core chain -->
+  <rect x="1045" y="616" width="240" height="76" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1061" y="640" class="h">Observations</text>
+  <text x="1061" y="662" class="s">time, sensor, slot, likelihood,</text>
+  <text x="1061" y="680" class="s">quality, weight, kid evidence</text>
+
+  <rect x="1045" y="714" width="240" height="76" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1061" y="738" class="h">Evidence memory</text>
+  <text x="1061" y="760" class="s">in-RAM ledger, one volunteer</text>
+  <text x="1061" y="778" class="s">wiped at the end of each round</text>
+
+  <rect x="1045" y="812" width="240" height="76" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1061" y="836" class="h">Fusion</text>
+  <text x="1061" y="858" class="s">tempered log opinion pool</text>
+  <text x="1061" y="876" class="s">sensor off = term omitted</text>
+
+  <rect x="1045" y="910" width="240" height="76" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1061" y="934" class="h">Representation</text>
+  <text x="1061" y="956" class="s">belief over the 6 slots</text>
+  <text x="1061" y="974" class="s">with certainty per slot</text>
+
+  <rect x="1045" y="1008" width="240" height="118" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1061" y="1032" class="h">Explanation (XAI)</text>
+  <text x="1061" y="1054" class="s">clue balance = exact Shapley</text>
+  <text x="1061" y="1072" class="s">what-ifs: 4 sensor set-ups</text>
+  <text x="1061" y="1090" class="s">certainty words, conflicts</text>
+  <text x="1061" y="1108" class="s">template sentences only</text>
+
+  <line x1="1000" y1="646" x2="1043" y2="646" class="eyes" marker-end="url(#aE)"/>
+  <polyline points="1000,901 1022,901 1022,672 1043,672" class="ears" marker-end="url(#aA)"/>
+  <line x1="1165" y1="692" x2="1165" y2="712" class="core" marker-end="url(#aC)"/>
+  <line x1="1165" y1="790" x2="1165" y2="810" class="core" marker-end="url(#aC)"/>
+  <line x1="1165" y1="888" x2="1165" y2="908" class="core" marker-end="url(#aC)"/>
+  <line x1="1165" y1="986" x2="1165" y2="1006" class="core" marker-end="url(#aC)"/>
+
+  <!-- outputs -->
+  <rect x="1325" y="616" width="240" height="116" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1341" y="640" class="h">Robot behaviour</text>
+  <text x="1341" y="666" class="b">Piper TTS: robot's voice</text>
+  <text x="1341" y="690" class="b">poses, head turns, LEDs</text>
+  <text x="1341" y="716" class="s">sent to the robot</text>
+
+  <rect x="1325" y="752" width="240" height="140" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2"/>
+  <text x="1341" y="776" class="h">TV UI (browser, HDMI)</text>
+  <text x="1341" y="802" class="b">robot's-eye view (pixelated)</text>
+  <text x="1341" y="826" class="b">avatar: one element per slot</text>
+  <text x="1341" y="850" class="b">why-cards, clue balance</text>
+  <text x="1341" y="874" class="b">never-guess panel</text>
+
+  <rect x="1325" y="912" width="240" height="110" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="1341" y="936" class="h">Optional: imagination</text>
+  <text x="1341" y="958" class="s">LCM img2img restyles the avatar</text>
+  <text x="1341" y="976" class="s">as a cartoon robot, believed</text>
+  <text x="1341" y="994" class="s">words only, AI-marked; iGPU</text>
+  <text x="1341" y="1012" class="s">2.6 s (dev laptop) or NVIDIA GPU</text>
+
+  <rect x="1325" y="1036" width="240" height="70" rx="8" fill="#ffffff" stroke="#3b4252" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="1341" y="1060" class="h">Optional: card printer</text>
+  <text x="1341" y="1082" class="s">offline USB; no photo, no name</text>
+
+  <polyline points="1285,1071 1305,1071 1305,674" class="core"/>
+  <line x1="1305" y1="674" x2="1323" y2="674" class="core" marker-end="url(#aC)"/>
+  <line x1="1305" y1="822" x2="1323" y2="822" class="core" marker-end="url(#aC)"/>
+  <line x1="1305" y1="967" x2="1323" y2="967" class="opt" marker-end="url(#aC)"/>
+  <line x1="1305" y1="1071" x2="1323" y2="1071" class="opt" marker-end="url(#aC)"/>
+
+  <!-- ===== Lane 3: external ===== -->
+  <rect x="20" y="1162" width="1560" height="90" rx="14" fill="#fbefef" stroke="#e3b5b5" stroke-width="1.5"/>
+  <text x="40" y="1194" class="lane" style="fill:#a33a3a">EXTERNAL / CLOUD: NOTHING</text>
+  <text x="40" y="1226" class="b">No internet link, no vendor cloud or app, no cloud AI APIs, no QR or e-mail delivery. Laptop firewall denies all outbound traffic; venue Wi-Fi is not used.</text>
+  <g fill="#ffffff" stroke="#a33a3a" stroke-width="2.5">
+    <circle cx="1440" cy="1214" r="16"/>
+    <circle cx="1466" cy="1201" r="22"/>
+    <circle cx="1494" cy="1214" r="16"/>
+  </g>
+  <rect x="1440" y="1206" width="54" height="23" fill="#ffffff"/>
+  <line x1="1440" y1="1230" x2="1494" y2="1230" stroke="#a33a3a" stroke-width="2.5"/>
+  <line x1="1418" y1="1242" x2="1516" y2="1174" stroke="#a33a3a" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- footer -->
+  <text x="40" y="1282" class="s">Latency figures: measured on the dev laptop (Intel Core Ultra 7 255U, no NVIDIA GPU; imagination on its integrated GPU), docs/_brief.md section 4. Colour code: eyes #2f7de1, ears #f08a24.</text>
+</svg>

@@ -1,0 +1,86 @@
+{
+ "cpu": "Intel Core Ultra 7 255U (12C/14T), Windows 11, battery/AC unknown",
+ "clip_s": 10.0,
+ "silero_vad": {
+  "ms_per_32ms_chunk": 0.693,
+  "s_per_10s_clip": 0.093,
+  "segments": 4
+ },
+ "fw_tiny": {
+  "load_s": 0.9,
+  "s_per_10s_en_wordts": 0.56,
+  "s_per_10s_autolang": 1.12,
+  "lang_detected": "en",
+  "text": "bin blue in f3 again. bin red in i1 please. Play screen at z7 please. Play screen in f2."
+ },
+ "fw_base": {
+  "load_s": 0.8,
+  "s_per_10s_en_wordts": 1.15,
+  "s_per_10s_autolang": 2.84,
+  "lang_detected": "en",
+  "text": "bin blue in f3 again bin red in i1 please play screen at z7 please play screen in f5"
+ },
+ "fw_small": {
+  "load_s": 1.9,
+  "s_per_10s_en_wordts": 4.25,
+  "s_per_10s_autolang": 6.85,
+  "lang_detected": "en",
+  "text": "bin blue in f3 again bin red in i1 please place green at z7 please place green in f5"
+ },
+ "fw_medium": {
+  "load_s": 7.1,
+  "s_per_10s_en_wordts": 12.36,
+  "s_per_10s_autolang": 48.3,
+  "lang_detected": "en",
+  "text": "Bin blue in F3 again. Bin red in I1 please. Place green at Z7 please. Place green in F5."
+ },
+ "fw_turbo": {
+  "load_s": 14.7,
+  "s_per_10s_en_wordts": 15.51,
+  "s_per_10s_autolang": 38.6,
+  "lang_detected": "en",
+  "text": "Bin blue in F3 again. Bin red in I1 please. Place green at Z7 please. Place green in F5."
+ },
+ "parakeet_v3_int8_onnx": {
+  "load_s": 7.8,
+  "s_per_10s": 3.45,
+  "text": "Bin blue in F three again. Bin red in I one, please. Play screen at Z seven please. Place screen in F five."
+ },
+ "prosody": {
+  "pyin_s_per_10s": 0.876,
+  "yin_s_per_10s": 0.0756,
+  "rms_s_per_10s": 0.00168,
+  "median_f0_hz": 117.04744916039132,
+  "voiced_frac": 0.5644355644355644
+ },
+ "clap_clap-htsat-unfused": "ERROR 'BaseModelOutputWithPooling' object has no attribute 'norm'",
+ "clap_larger_clap_general": "ERROR 'BaseModelOutputWithPooling' object has no attribute 'norm'",
+ "ast_audioset": {
+  "s_per_10s": 8.537,
+  "top5": [
+   [
+    "Speech",
+    0.889
+   ],
+   [
+    "Speech synthesizer",
+    0.3
+   ],
+   [
+    "Narration, monologue",
+    0.271
+   ],
+   [
+    "Male speech, man speaking",
+    0.208
+   ],
+   [
+    "Clicking",
+    0.014
+   ]
+  ]
+ },
+ "me5_small": {
+  "s_per_4_sentences": 0.1849
+ }
+}

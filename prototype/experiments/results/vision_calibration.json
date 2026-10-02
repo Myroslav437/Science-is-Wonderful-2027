@@ -1,0 +1,54 @@
+{
+ "data": "Open Images V7 validation, human-verified labels, adults only (Boy/Girl images excluded)",
+ "protocol": "contrast-prompt score on head crop; Platt scaling; 5-fold stratified CV",
+ "results": {
+  "ViT-B-32": {
+   "hat": {
+    "n_pos": 79,
+    "n_neg": 52,
+    "auroc": 0.751,
+    "accuracy_cv": 0.656,
+    "ece_cv": 0.103,
+    "brier_cv": 0.207,
+    "sure_fraction": 0.015,
+    "sure_precision": 0.5,
+    "linear_probe_auroc_cv": 0.826
+   },
+   "glasses": {
+    "n_pos": 120,
+    "n_neg": 99,
+    "auroc": 0.914,
+    "accuracy_cv": 0.858,
+    "ece_cv": 0.084,
+    "brier_cv": 0.117,
+    "sure_fraction": 0.507,
+    "sure_precision": 0.928,
+    "linear_probe_auroc_cv": 0.915
+   }
+  },
+  "ViT-B-16-SigLIP2": {
+   "hat": {
+    "n_pos": 79,
+    "n_neg": 52,
+    "auroc": 0.774,
+    "accuracy_cv": 0.672,
+    "ece_cv": 0.179,
+    "brier_cv": 0.21,
+    "sure_fraction": 0.0,
+    "sure_precision": null,
+    "linear_probe_auroc_cv": 0.852
+   },
+   "glasses": {
+    "n_pos": 120,
+    "n_neg": 99,
+    "auroc": 0.92,
+    "accuracy_cv": 0.904,
+    "ece_cv": 0.15,
+    "brier_cv": 0.11,
+    "sure_fraction": 0.37,
+    "sure_precision": 0.914,
+    "linear_probe_auroc_cv": 0.921
+   }
+  }
+ }
+}

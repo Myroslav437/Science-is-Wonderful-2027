@@ -1,0 +1,13 @@
+{
+ "backbone": "ViT-B-32",
+ "pretrained": "laion2b_s34b_b79k",
+ "why": "best calibration (ECE) and 3-4x faster on CPU; SigLIP2 AUROC only marginally higher (see experiments/results/vision_calibration.json)",
+ "hat": {
+  "a": 24.21884536743164,
+  "b": -0.018697699531912804
+ },
+ "glasses": {
+  "a": 43.54482650756836,
+  "b": -1.0507246255874634
+ }
+}

@@ -1,0 +1,97 @@
+{
+ "note": "Each visitor is a real person from a public dataset, processed by the real pipeline (MediaPipe + CLIP ViT-B/32 + Silero VAD + Whisper small + evidence fusion). Variants re-use the same recording with a simulated sensor problem.",
+ "source": "Seamless Interaction (Meta, 2025), CC BY-NC 4.0 - naturalistic/dev",
+ "visitors": [
+  {
+   "id": "v01",
+   "label": "Visitor A",
+   "story": "would love to ride a horse ('horses are my favorite non household pet animal')",
+   "variants": {
+    "clean": "v01-clean.json",
+    "noisy-ears": "v01-noisy-ears.json",
+    "foggy-eyes": "v01-foggy-eyes.json"
+   },
+   "audio": {
+    "clean": "audio/v01-clean.mp3",
+    "noisy-ears": "audio/v01-noisy-ears.mp3",
+    "foggy-eyes": "audio/v01-clean.mp3"
+   }
+  },
+  {
+   "id": "v02",
+   "label": "Visitor B",
+   "story": "got a bunny rabbit for a 14th birthday; also says 'Snow White', 'not a cat or a dog' and 'ginger brown' (traps for keyword spotting)",
+   "variants": {
+    "clean": "v02-clean.json",
+    "noisy-ears": "v02-noisy-ears.json",
+    "foggy-eyes": "v02-foggy-eyes.json"
+   },
+   "audio": {
+    "clean": "audio/v02-clean.mp3",
+    "noisy-ears": "audio/v02-noisy-ears.mp3",
+    "foggy-eyes": "audio/v02-clean.mp3"
+   }
+  },
+  {
+   "id": "v03",
+   "label": "Visitor C",
+   "story": "talks about their dog that jumps up and 'talks' to them",
+   "variants": {
+    "clean": "v03-clean.json",
+    "noisy-ears": "v03-noisy-ears.json",
+    "foggy-eyes": "v03-foggy-eyes.json"
+   },
+   "audio": {
+    "clean": "audio/v03-clean.mp3",
+    "noisy-ears": "audio/v03-noisy-ears.mp3",
+    "foggy-eyes": "audio/v03-clean.mp3"
+   }
+  },
+  {
+   "id": "v04",
+   "label": "Visitor D",
+   "story": "tells a story: 'The cat's name was Cat and his favorite friend was Dog'",
+   "variants": {
+    "clean": "v04-clean.json",
+    "noisy-ears": "v04-noisy-ears.json",
+    "foggy-eyes": "v04-foggy-eyes.json"
+   },
+   "audio": {
+    "clean": "audio/v04-clean.mp3",
+    "noisy-ears": "audio/v04-noisy-ears.mp3",
+    "foggy-eyes": "audio/v04-clean.mp3"
+   }
+  },
+  {
+   "id": "v05",
+   "label": "Visitor E",
+   "story": "'I love playful toys because Snappadoodle, that's my new dog'",
+   "variants": {
+    "clean": "v05-clean.json",
+    "noisy-ears": "v05-noisy-ears.json",
+    "foggy-eyes": "v05-foggy-eyes.json"
+   },
+   "audio": {
+    "clean": "audio/v05-clean.mp3",
+    "noisy-ears": "audio/v05-noisy-ears.mp3",
+    "foggy-eyes": "audio/v05-clean.mp3"
+   }
+  },
+  {
+   "id": "v06",
+   "label": "Visitor F",
+   "story": "would love to talk to animals - 'a friendly one, like an elephant'",
+   "variants": {
+    "clean": "v06-clean.json",
+    "noisy-ears": "v06-noisy-ears.json",
+    "foggy-eyes": "v06-foggy-eyes.json"
+   },
+   "audio": {
+    "clean": "audio/v06-clean.mp3",
+    "noisy-ears": "audio/v06-noisy-ears.mp3",
+    "foggy-eyes": "audio/v06-clean.mp3"
+   }
+  }
+ ],
+ "audio_note": "Visitor voices: the original recordings (loudness-matched); the noisy-room files contain the crowd mix the robot heard. Seamless Interaction, Meta 2025, CC BY-NC 4.0."
+}

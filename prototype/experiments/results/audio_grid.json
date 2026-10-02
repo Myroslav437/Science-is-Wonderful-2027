@@ -1,0 +1,68 @@
+{
+ "data": "Lombard GRID (CC BY 4.0), 12 talkers x 4 colours x {plain, Lombard} x 2 = 192 utterances",
+ "asr": "faster-whisper small int8, CPU, beam 1, word timestamps; closed EN/FR/NL/DE/PL lexicon",
+ "results": {
+  "clean": {
+   "n": 192,
+   "snr_db": null,
+   "colour_word_correct": 0.797,
+   "colour_word_wrong_value": 0.0,
+   "colour_word_missed": 0.203,
+   "loud_vs_plain_auroc_absolute_level": 0.813,
+   "lombard_minus_plain_db_within_talker": 6.95,
+   "language_detected_en": 1.0,
+   "seconds_per_clip_cpu": 2.28,
+   "examples_wrong": []
+  },
+  "babble_10dB": {
+   "n": 192,
+   "snr_db": 10,
+   "colour_word_correct": 0.714,
+   "colour_word_wrong_value": 0.0,
+   "colour_word_missed": 0.286,
+   "loud_vs_plain_auroc_absolute_level": 0.818,
+   "lombard_minus_plain_db_within_talker": 7.04,
+   "language_detected_en": 1.0,
+   "seconds_per_clip_cpu": 2.91,
+   "examples_wrong": []
+  },
+  "babble_5dB": {
+   "n": 192,
+   "snr_db": 5,
+   "colour_word_correct": 0.641,
+   "colour_word_wrong_value": 0.0,
+   "colour_word_missed": 0.359,
+   "loud_vs_plain_auroc_absolute_level": 0.82,
+   "lombard_minus_plain_db_within_talker": 7.15,
+   "language_detected_en": 1.0,
+   "seconds_per_clip_cpu": 3.68,
+   "examples_wrong": []
+  },
+  "babble_0dB": {
+   "n": 192,
+   "snr_db": 0,
+   "colour_word_correct": 0.266,
+   "colour_word_wrong_value": 0.005,
+   "colour_word_missed": 0.729,
+   "loud_vs_plain_auroc_absolute_level": 0.816,
+   "lombard_minus_plain_db_within_talker": 7.31,
+   "language_detected_en": 0.995,
+   "seconds_per_clip_cpu": 4.91,
+   "examples_wrong": [
+    "Be very white as it is soon."
+   ]
+  },
+  "clean_auto_language": {
+   "n": 192,
+   "snr_db": null,
+   "colour_word_correct": 0.734,
+   "colour_word_wrong_value": 0.0,
+   "colour_word_missed": 0.266,
+   "loud_vs_plain_auroc_absolute_level": 0.813,
+   "lombard_minus_plain_db_within_talker": 6.95,
+   "language_detected_en": 0.854,
+   "seconds_per_clip_cpu": 6.01,
+   "examples_wrong": []
+  }
+ }
+}

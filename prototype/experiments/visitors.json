@@ -1,0 +1,131 @@
+{
+ "_about": "Prototype 'visitors': real people from the Seamless Interaction dataset (Meta, 2025, CC BY-NC 4.0, naturalistic/dev split), each a 23-38 s segment chosen because the person mentions an animal. Ground truth was annotated by hand from the video and the dataset's own transcript (not from our pipeline). 'calibration_db' = median speech level of that recording vendor's setup (booth-calibration analogue). Glasses were verified on full-resolution face crops for all visitors.",
+ "visitors": [
+  {
+   "id": "v01",
+   "label": "Visitor A",
+   "file": "V01_S0158_I00000127_P1290",
+   "start": 2,
+   "end": 35,
+   "pixel_aspect": 0.5625,
+   "rotate": null,
+   "calibration_db": -17.1,
+   "story": "would love to ride a horse ('horses are my favorite non household pet animal')",
+   "truth": {
+    "animal": "horse",
+    "colour": null,
+    "shirt": [
+     "white",
+     "grey"
+    ],
+    "hat": "no hat",
+    "glasses": "no glasses"
+   }
+  },
+  {
+   "id": "v02",
+   "label": "Visitor B",
+   "file": "V00_S0377_I00000490_P0410",
+   "start": 30,
+   "end": 62,
+   "pixel_aspect": 1.0,
+   "rotate": null,
+   "calibration_db": -44.7,
+   "story": "got a bunny rabbit for a 14th birthday; also says 'Snow White', 'not a cat or a dog' and 'ginger brown' (traps for keyword spotting)",
+   "truth": {
+    "animal": "rabbit",
+    "colour": null,
+    "shirt": [
+     "orange"
+    ],
+    "hat": "no hat",
+    "glasses": "no glasses"
+   }
+  },
+  {
+   "id": "v03",
+   "label": "Visitor C",
+   "file": "V03_S0861_I00000374_P1659",
+   "start": 12,
+   "end": 50,
+   "pixel_aspect": 1.0,
+   "rotate": "ccw",
+   "calibration_db": -27.7,
+   "story": "talks about their dog that jumps up and 'talks' to them",
+   "truth": {
+    "animal": "dog",
+    "colour": null,
+    "shirt": [
+     "green",
+     "blue"
+    ],
+    "hat": "no hat",
+    "glasses": "glasses"
+   },
+   "truth_note": "glasses corrected after checking a full-resolution face crop (thin transparent frames); the robot detected them before the annotator did"
+  },
+  {
+   "id": "v04",
+   "label": "Visitor D",
+   "file": "V00_S0825_I00000135_P0500",
+   "start": 20,
+   "end": 50,
+   "pixel_aspect": 1.0,
+   "rotate": null,
+   "calibration_db": -44.7,
+   "story": "tells a story: 'The cat's name was Cat and his favorite friend was Dog'",
+   "truth": {
+    "animal": "cat",
+    "colour": null,
+    "shirt": [
+     "pink",
+     "grey",
+     "white"
+    ],
+    "hat": "no hat",
+    "glasses": "no glasses"
+   }
+  },
+  {
+   "id": "v05",
+   "label": "Visitor E",
+   "file": "V00_S0305_I00000503_P0116",
+   "start": 95,
+   "end": 118,
+   "pixel_aspect": 1.0,
+   "rotate": null,
+   "calibration_db": -44.7,
+   "story": "'I love playful toys because Snappadoodle, that's my new dog'",
+   "truth": {
+    "animal": "dog",
+    "colour": null,
+    "shirt": [
+     "blue"
+    ],
+    "hat": "no hat",
+    "glasses": "no glasses"
+   }
+  },
+  {
+   "id": "v06",
+   "label": "Visitor F",
+   "file": "V03_S0997_I00000139_P3430",
+   "start": 25,
+   "end": 55,
+   "pixel_aspect": 1.0,
+   "rotate": null,
+   "calibration_db": -27.7,
+   "story": "would love to talk to animals - 'a friendly one, like an elephant'",
+   "truth": {
+    "animal": "elephant",
+    "colour": null,
+    "shirt": [
+     "blue",
+     "grey"
+    ],
+    "hat": "no hat",
+    "glasses": "glasses"
+   }
+  }
+ ]
+}

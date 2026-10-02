@@ -1,0 +1,406 @@
+<title>Robot Dog Booth Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a readable memo column with a sticky contents rail on wide screens; the exhibit's own eyes/ears colour code carries through. */
+:root {
+  --bg: #f4f6fa;
+  --paper: #ffffff;
+  --ink: #1b2233;
+  --ink-2: #4e5669;
+  --rule: #dde2ec;
+  --eyes: #2f6fd1;
+  --ears: #c4620c;
+  --both: #6a4fc0;
+  --good: #1d7a45;
+  --bad: #b8322a;
+  --tint-eyes: #e8f0fc;
+  --tint-ears: #fbefe3;
+  --tint-both: #efebfa;
+  --font-display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1522; --paper: #161e2e; --ink: #e8ecf4; --ink-2: #a8b1c4; --rule: #2a3447;
+    --eyes: #6ea2f0; --ears: #f0a25a; --both: #a38cf0; --good: #5cc38a; --bad: #f07a70;
+    --tint-eyes: #17263f; --tint-ears: #33241a; --tint-both: #241f3b; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1522; --paper: #161e2e; --ink: #e8ecf4; --ink-2: #a8b1c4; --rule: #2a3447;
+  --eyes: #6ea2f0; --ears: #f0a25a; --both: #a38cf0; --good: #5cc38a; --bad: #f07a70;
+  --tint-eyes: #17263f; --tint-ears: #33241a; --tint-both: #241f3b; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.6; margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; font-size: 14px; }
+nav.toc p { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px; }
+nav.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+nav.toc a { color: var(--ink-2); text-decoration: none; display: block; padding: 3px 8px; border-left: 2px solid var(--rule); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--ink); border-left-color: var(--both); outline: none; }
+main { min-width: 0; }
+header.top { display: grid; gap: 14px; padding-bottom: 26px; border-bottom: 1px solid var(--rule); margin-bottom: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(38px, 6vw, 58px); line-height: 1.02; margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+h1 .eyes { color: var(--eyes); } h1 .ears { color: var(--ears); }
+.lede { font-size: 20px; max-width: 64ch; margin: 0; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--ink-2); }
+.meta strong { color: var(--ink); }
+.deadline { display: inline-flex; gap: 10px; align-items: baseline; background: var(--paper); border: 1px solid var(--rule); border-left: 4px solid var(--bad); padding: 10px 14px; border-radius: 6px; font-size: 15px; max-width: fit-content; }
+.deadline b { font-family: var(--font-mono); font-weight: 600; }
+section { padding-top: 34px; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+h3 { font-size: 18px; margin: 22px 0 6px; }
+p, li { max-width: 72ch; }
+p { margin: 0 0 12px; }
+ul, ol { margin: 0 0 12px; padding-left: 22px; }
+li { margin-bottom: 5px; }
+a { color: var(--both); }
+.e { color: var(--eyes); font-weight: 700; } .a { color: var(--ears); font-weight: 700; } .b { color: var(--both); font-weight: 700; }
+figure { margin: 18px 0; }
+figure .frame { background: #ffffff; border: 1px solid var(--rule); border-radius: 8px; padding: 10px; overflow-x: auto; }
+figure img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+figcaption { font-size: 14px; color: var(--ink-2); margin-top: 8px; max-width: 80ch; }
+.tablewrap { overflow-x: auto; margin: 14px 0; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); font-weight: 600; background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--font-mono); font-size: 14px; white-space: nowrap; }
+.row-both td:first-child { box-shadow: inset 4px 0 0 var(--both); }
+.row-eyes td:first-child { box-shadow: inset 4px 0 0 var(--eyes); }
+.row-ears td:first-child { box-shadow: inset 4px 0 0 var(--ears); }
+.steps { counter-reset: s; list-style: none; padding: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: s; position: relative; padding: 12px 14px 12px 52px; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; max-width: none; }
+.steps li::before { content: counter(s); position: absolute; left: 14px; top: 11px; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--paper); font-family: var(--font-mono); font-size: 13px; display: grid; place-items: center; }
+.steps .say { display: block; font-style: italic; color: var(--ink-2); }
+.callout { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+.callout.both { background: var(--tint-both); border-color: transparent; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.card h3 { margin-top: 0; }
+.formula { font-family: var(--font-mono); font-size: 14px; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; overflow-x: auto; white-space: pre; }
+.never { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; list-style: none; padding: 0; }
+.never li { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; font-size: 15px; max-width: none; }
+.never b { display: block; }
+.tag { display: inline-block; font-family: var(--font-mono); font-size: 12px; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; }
+.tag.good { color: var(--good); } .tag.bad { color: var(--bad); } .tag.plan { color: var(--ink-2); }
+footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--ink-2); }
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  nav.toc { display: none; }
+  .two, .never { grid-template-columns: minmax(0, 1fr); }
+  body { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+  <nav class="toc" aria-label="Contents">
+    <p>Contents</p>
+    <ol>
+      <li><a href="#video">Demo video</a></li>
+      <li><a href="#idea">Core idea</a></li>
+      <li><a href="#learn">What children learn</a></li>
+      <li><a href="#visit">Visitor experience</a></li>
+      <li><a href="#science">The science</a></li>
+      <li><a href="#results">Prototype results</a></li>
+      <li><a href="#hardware">Hardware and budget</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#ethics">Ethics and privacy</a></li>
+      <li><a href="#fit">Why it fits the call</a></li>
+      <li><a href="#changes">What we changed</a></li>
+      <li><a href="#next">Decisions before Monday</a></li>
+      <li><a href="#files">Files</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="top">
+      <div class="eyebrow">Booth proposal - Science is Wonderful! 2027 - draft for TUAI partners - 2 Oct 2026</div>
+      <h1>How does a robot see you?<br><span class="eyes">Eyes</span>, <span class="ears">ears</span> and an honest robot dog</h1>
+      <p class="lede">A small robot dog builds a picture of a visitor from its camera and microphone. Children switch its senses on and off and watch what it knows, how sure it is, why it thinks so, and what it will never try to guess.</p>
+      <div class="meta">
+        <span><strong>Team</strong> DC7 Myroslav Mishchuk (explainable AI), DC5 Pi-Wei Chen (sensor fusion), + 1 French/Dutch speaker</span>
+        <span><strong>Network</strong> TUAI MSCA Doctoral Network, grant 101168344, Silesian University of Technology</span>
+      </div>
+      <div class="deadline"><span>Call deadline</span><b>Tue 6 Oct 2026, 12:00 CEST</b><span>Fair: Brussels, 17-19 Mar 2027</span></div>
+      <figure style="margin:6px 0 0"><div class="frame"><img src="assets/exhibit_screen.jpg" alt="The exhibition screen of the working prototype: big Eyes and Ears switches, the robot dog, the pixelated camera view and the words heard, the robot's cartoon drawing of the visitor with certainty marks and an AI imagination card, a 'What if' strip with four sensor settings, explanation cards with clue bars, and the 'Things I will never guess' panel." width="1920" height="1080"></div>
+      <figcaption>The working prototype's exhibition screen for a real recorded visitor. Try it: <a href="https://claude.ai/artifact/QtTQJbyT2cXppcQX7hR9Xf">interactive demo</a> (switch the eyes and ears, add a foggy lens or noisy room, pick one of six visitors).</figcaption></figure>
+    </header>
+
+    <section id="video">
+      <h2>Demo video (3 min 31 s)</h2>
+      <p>The prototype's own screen, driven through all sensor settings with real recordings. You hear the visitors' own voices, and in the noisy-room scenes you hear exactly the crowd mix the robot heard. The robot's lines are spoken by an offline voice, and captions explain each step.</p>
+      <ul>
+        <li><b>Demo A:</b> eyes + ears together.</li>
+        <li><b>Demo B</b> and <b>Demo C:</b> eyes only, then ears only.</li>
+        <li><b>Demo D:</b> why the robot thinks what it thinks, including a confident mistake.</li>
+        <li><b>Trouble:</b> a noisy room, other voices in the crowd, and a foggy lens.</li>
+        <li><b>Demo E:</b> the picture building up over time.</li>
+        <li><b>Ending:</b> the imagination picture, the "never guess" promises and the take-home card.</li>
+      </ul>
+      <figure><div class="frame" style="padding:0;background:#000"><video controls preload="metadata" poster="assets/exhibit_screen.jpg" style="display:block;width:100%;height:auto" src="assets/demo_video.mp4"></video></div>
+      <figcaption>Rendered with <code>prototype/video/render_video.py</code> from the real UI and real model outputs. Visitor recordings: Seamless Interaction (Meta, CC BY-NC 4.0), shown pixelated. This is the partner demo, not the 120-second application video, which must show the lead researcher.</figcaption></figure>
+    </section>
+
+    <section id="idea">
+      <h2>Core idea</h2>
+      <p>A robot does not know you. It collects clues from imperfect sensors and builds an internal picture of you. That picture changes with the senses it may use, and it can be wrong. Our booth turns this into a hands-on activity.</p>
+      <ul>
+        <li>The robot's <b>representation</b> is a belief over six child-safe questions: favourite animal, favourite colour, clothes colour, glasses, how much is happening right now, and the voice it hears right now. Each answer carries a certainty word (<em>sure, I think, guessing, don't know</em>).</li>
+        <li>The screen draws it as a cartoon. Every part of the drawing is one answer. Unsure parts are faded or dashed, unknown parts are a "?", and a badge shows which sense found each part: <span class="e">eyes</span> (camera) or <span class="a">ears</span> (microphone).</li>
+        <li>Big switches turn the <span class="e">eyes</span> and <span class="a">ears</span> on and off, or add trouble ("foggy lens", "noisy room"). The picture and its explanation change at once.</li>
+        <li>"Why does the robot think this?" cards show the clues from each sense, computed from the same numbers the robot uses. A panel lists the things it will never guess, and why.</li>
+      </ul>
+      <p>The working prototype already does all of this offline on a laptop, on recordings of real people.</p>
+    </section>
+
+    <section id="learn">
+      <h2>What children learn</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Concept</th><th>The moment they experience it</th></tr></thead>
+        <tbody>
+          <tr><td>AI only sees the information available to it</td><td>All senses off: the drawing is a grey "?"</td></tr>
+          <tr><td>Different sensors give different information</td><td>Eyes find the clothes colour; ears find the favourite animal; neither can do the other's job</td></tr>
+          <tr><td>Combining sensors changes the result</td><td>Both on: the picture is the most complete; the "what if?" strip shows all four combinations</td></tr>
+          <tr><td>Inference is not certainty</td><td>Certainty words and faded parts; "I'm guessing your favourite colour from your clothes"</td></tr>
+          <tr><td>AI can make mistakes</td><td>"Fool the robot": show a cat card but say "dog"; a word heard out of context makes it confidently wrong</td></tr>
+          <tr><td>Explanations show the evidence</td><td>Clue balance per sense, and evidence cards with times ("heard you say 'horse' at 0:05")</td></tr>
+          <tr><td>Removing information changes conclusions</td><td>Flip a switch: the answers that sense supported turn into "I don't know yet"</td></tr>
+          <tr><td>Some things AI should never guess</td><td>"Things I will never guess": who you are, feelings, age, gender, origin, health, headwear</td></tr>
+        </tbody>
+      </table></div>
+      <p>Age layers: icons and the cartoon for 7-10; clue balance and certainty words for 11-14; adding up log-odds "clues", bias and the EU AI Act for 15-18.</p>
+    </section>
+
+    <section id="visit">
+      <h2>Visitor experience</h2>
+      <p>The fair sends school groups of up to a whole class for about 15 minutes. We therefore run a <b>15-minute group module</b>, with 2-3 volunteers taking short turns while the rest of the group operates switches and predicts.</p>
+      <div class="two">
+        <div class="card"><h3>15 minutes, whole group</h3>
+          <ul>
+            <li><b>0-2 min</b> Which senses do you use to recognise a friend? The robot introduces itself as a computer program.</li>
+            <li><b>2-12 min</b> 2-3 volunteer rounds of about 3 min each; the group votes on predictions and flips switches.</li>
+            <li><b>12-14 min</b> Reveal: which sense helped most, when was it sure but wrong, what it will never guess.</li>
+            <li><b>14-15 min</b> "Forget me": a pupil presses the button and the robot wipes its memory.</li>
+          </ul>
+        </div>
+        <div class="card"><h3>Booth</h3>
+          <figure style="margin:0"><div class="frame"><img src="assets/booth_sketch.png" alt="Top view of the 4 by 2 metre booth: TV on the back wall, table with laptop, router, robot dog in a pen, switch panel and card printer; volunteer mat in front; group in an arc; privacy sign." width="1600" height="1000"></div></figure>
+        </div>
+      </div>
+      <h3>One volunteer round, about 3 minutes</h3>
+      <ol class="steps">
+        <li><b>Meet.</b> The volunteer steps onto the mat; nothing is on yet. <span class="say">"Hi! I'm a robot dog, a computer program. My eyes and ears are off until you switch them on."</span></li>
+        <li><b>Predict.</b> The group votes: what will the robot get right, and how sure will it be?</li>
+        <li><b>Eyes on.</b> The camera looks only at the mat. Within seconds the drawing gets the clothes colour (with an eye badge) and maybe glasses, still faded.</li>
+        <li><b>Ears on.</b> <span class="say">"What is your favourite animal? You can say it or show me a picture card."</span> The animal appears with an ear badge. <span class="say">"And your favourite colour?"</span></li>
+        <li><b>Why?</b> A pupil picks a card: <span class="say">"I'm sure your favourite animal is a horse, because my ears heard you say 'horse'."</span> The clue balance shows which sense pushed the answer.</li>
+        <li><b>Switch and trouble.</b> Eyes off, ears off, foggy lens, noisy room. The group checks its predictions. The robot answers neutrally: <span class="say">"OK, I'll only use what you tell me."</span></li>
+        <li><b>Fool the robot.</b> Show a cat card but say "dog": <span class="say">"My senses disagree. For this question I trust my ears more."</span></li>
+        <li><b>End.</b> Optional printed card with the drawing and three facts, no photo and no name. Then <span class="say">"Now I forget everything. Bye!"</span></li>
+      </ol>
+    </section>
+
+    <section id="science">
+      <h2>The science</h2>
+      <p>The booth shows our two PhD questions in child-sized form. <b>Sensor fusion (DC5):</b> combine senses, keep working when one fails, and know when you are unsure. <b>Explainable AI (DC7):</b> show why a decision was made, faithfully.</p>
+      <h3>Representation and memory</h3>
+      <p>The robot's memory for one visitor is an in-RAM evidence ledger. Each row records a time, a sense, a question, a likelihood over the answers, a signal quality and a child-readable clue. There are no images, audio, transcripts or embeddings, and the ledger is wiped when the visitor leaves. The representation is the belief computed from this ledger: a training-free concept bottleneck over a closed, child-safe vocabulary.</p>
+      <h3>Fusion</h3>
+      <div class="formula">score(answer) = log prior + Σ over senses that are ON of E_sense(answer)
+E_sense = κ · mean over clues [ log( r·L + (1-r)/|answers| ) - log(1/|answers|) ]
+κ = 1 - exp(-Σ quality·weight / 1.5)   (more good clues -> more weight, but it saturates)</div>
+      <ul>
+        <li><b>r, relevance:</b> clothes colour is only a weak hint about a favourite colour (r = 0.35); a spoken word is direct (r = 1).</li>
+        <li><b>weight:</b> one video frame counts 0.2-0.3 (frames are correlated); one spoken word counts 2.</li>
+        <li><b>A sense that is off</b> contributes no term. That is exact marginalisation, the same thing the physical switch does. We never feed a black frame or silence, which would be fake evidence.</li>
+      </ul>
+      <h3>Explanations that cannot lie about the model</h3>
+      <div class="callout both">In log-odds space the fusion is additive. Each sense's <b>clues</b> for an answer are therefore, all at once: its <b>exact Shapley value</b>, the change you see when you <b>switch that sense off</b>, and the <b>sum of its evidence cards</b>. A unit test checks this. The "what if?" strip re-runs the same fusion for all four switch settings. Sentences come from templates filled with ledger values; no language model writes text at runtime.</div>
+      <p>We assessed 20+ XAI methods for this pipeline (research/07). We rejected attention maps, LIME, pixel-level SHAP/RISE, MM-SHAP and LLM-written explanations for live use, because they are unfaithful, slow, or answer a different question.</p>
+      <h3>Perception</h3>
+      <div class="two">
+        <div class="card"><h3 class="e" style="margin-top:0">Eyes (camera)</h3>
+          <ul>
+            <li>MediaPipe face box and body pose</li>
+            <li>Clothes colour: k-means in CIELAB on the upper chest, 11 colour names</li>
+            <li>Glasses: CLIP ViT-B/32 with calibrated contrast prompts</li>
+            <li>Animal picture card: CLIP prompts</li>
+            <li>Movement: keypoint speed</li>
+          </ul>
+        </div>
+        <div class="card"><h3 class="a" style="margin-top:0">Ears (microphone)</h3>
+          <ul>
+            <li>Silero voice activity detection</li>
+            <li>faster-whisper speech recognition (multilingual)</li>
+            <li>A closed word list in FR, NL, EN, DE and PL; only matched words leave the module, never the transcript</li>
+            <li>Loudness against a booth calibration</li>
+          </ul>
+        </div>
+      </div>
+      <h3>The robot's imagination (optional)</h3>
+      <p>A small image generator (LCM-Dreamshaper, MIT licence) restyles the robot's own drawing into a cartoon robot friend. Its prompt is made only of the words the robot believes. It never sees the camera image and never draws a person. Images are labelled on screen and carry machine-readable "AI-generated" metadata (AI Act Art. 50(2)). It takes 2.6 s on the laptop's integrated GPU.</p>
+      <figure><div class="frame"><img src="assets/imagination_v06.jpg" alt="Four pictures of Visitor F: the robot's cartoon drawing, then three generated robot mascots for eyes plus ears (blue shirt and an elephant), eyes only (blue shirt and big glasses, no elephant) and ears only (an elephant, no shirt colour or glasses)." width="1710" height="420"></div>
+      <figcaption>Visitor F, from left: the robot's drawing; its imagination with eyes + ears (blue top, glasses, elephant); eyes only (no elephant); ears only (elephant, but no clothes or glasses).</figcaption></figure>
+    </section>
+
+    <section id="results">
+      <h2>Prototype results</h2>
+      <p>We tested the full pipeline before buying a robot. It uses real models, runs offline on a laptop CPU, and was run on six real adults from Meta's Seamless Interaction dataset (CC BY-NC 4.0, shown pixelated). These visitors talk freely about their pets and are not answering our questions, so the setting is harder than the booth.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Sensors (clean input)</th><th class="num">Things known of 6</th><th class="num">Claims correct</th><th class="num">Animal</th><th class="num">Clothes colour</th><th class="num">Glasses</th></tr></thead>
+        <tbody>
+          <tr class="row-both"><td><span class="b">Eyes + ears</span></td><td class="num">4.5</td><td class="num">94% (17)</td><td class="num">5/6</td><td class="num">6/6</td><td class="num">5/6</td></tr>
+          <tr class="row-eyes"><td><span class="e">Eyes only</span></td><td class="num">2.3</td><td class="num">100% (11)</td><td class="num">0/6</td><td class="num">6/6</td><td class="num">5/6</td></tr>
+          <tr class="row-ears"><td><span class="a">Ears only</span></td><td class="num">1.8</td><td class="num">83% (6)</td><td class="num">5/6</td><td class="num">0/6</td><td class="num">0/6</td></tr>
+        </tbody>
+      </table></div>
+      <figure><div class="frame"><img src="assets/fig_ablation_matrix.png" alt="Grid of what the robot concluded about six visitors with eyes and ears, eyes only and ears only. Animal answers appear only when the ears are on, clothes colour and glasses only when the eyes are on. One red box: Visitor B's favourite colour brown." width="2380" height="744"></div>
+      <figcaption>What each sensor setting concluded about each visitor. Darker = more sure. The red box is the robot's one unsupported confident claim.</figcaption></figure>
+      <ul>
+        <li><b>Each sense brings different evidence, and fusion knows the most.</b> This is the core message, and it holds on real data.</li>
+        <li><b>Noise makes the robot unsure more often than wrong.</b> In crowd babble at 0 dB, the robot heard the right colour word in 27% of 192 GRID utterances (80% clean) and a wrong one in only 0.5%. In the noisy-room variant the animal drops from 5/6 to 3/6, and the remaining claims are still 93% correct.</li>
+        <li><b>Other voices can inject false clues.</b> In the noisy-room variant, the robot became sure that Visitor E's favourite colour is white. It heard "white" four times, but from the crowd, not from her.</li>
+        <li><b>A degraded sense can also mislead.</b> Through the foggy lens, clothes look dark and eyes-only claims are only 25% correct. This is a lesson for visitors and a to-do for us (a stronger quality gate).</li>
+        <li><b>AI can be sure and wrong.</b> Visitor B said "Snow White" and "ginger brown" about her rabbit, and the robot became sure her favourite colour is brown. In the booth, words count only as answers to the robot's own question.</li>
+        <li><b>Far-field speech fails.</b> For Visitor C, both Whisper small and large-v3-turbo missed "my dog", so the robot honestly said "I don't know". This is why the booth uses a hand-held close-talk microphone.</li>
+        <li><b>Glasses detection is calibrated.</b> On 219 verified adult faces from Open Images: AUROC 0.91, calibration error 0.08, and 93% of "I'm sure" claims correct. In one case the robot spotted thin transparent glasses that our own first annotation had missed.</li>
+      </ul>
+      <figure><div class="frame"><img src="assets/fig_conditions.png" alt="Bar charts: things known and percentage of correct claims for eyes plus ears, eyes only and ears only, under clean, noisy room and foggy lens conditions." width="1540" height="504"></div>
+      <figcaption>Sensor trouble: things known per visitor (left) and share of checkable claims that are correct (right).</figcaption></figure>
+    </section>
+
+    <section id="hardware">
+      <h2>Hardware and budget</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Option</th><th class="num">Price</th><th>Camera / mic</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td><b>SunFounder PiDog V2</b> + Raspberry Pi 5 4 GB</td><td class="num">USD 179.99 kit + Pi</td><td>5 MP camera streamed as MJPEG; MEMS mic with raw audio; plus ultrasonic, touch, IMU, speaker</td><td><span class="tag good">recommended</span> Two units (one hot spare) cost about €770 landed</td></tr>
+          <tr><td>Luwu XGO-lite3 / DOGZILLA-Lite</td><td class="num">USD 599 / 639</td><td>5 MP camera, MEMS mic(s), speaker, screen</td><td><span class="tag plan">fallback</span> Assembled and quiet; slightly over budget after VAT; vendor cloud AI must be removed</td></tr>
+          <tr><td>Hiwonder PuppyPi Advanced</td><td class="num">USD 640+</td><td>480p camera, USB mic box</td><td>Robust, but over budget with a weak camera</td></tr>
+          <tr><td>Mini Pupper 2, Freenove, Petoi Bittle X, MechDog</td><td class="num">USD 130-649</td><td>Missing camera or raw mic, or a duty-cycle limit</td><td><span class="tag bad">not suitable</span></td></tr>
+          <tr><td>Unitree Go2 Air</td><td class="num">~USD 1,600+</td><td>No official SDK on Air; documented security issues</td><td><span class="tag bad">out of scope</span></td></tr>
+        </tbody>
+      </table></div>
+      <p><b>Budget, honestly:</b></p>
+      <ul>
+        <li>USD 600 covers the <b>robot part</b>: one PiDog with a Pi and spares, or two kits at list price. Two landed units cost about €770.</li>
+        <li>The <b>whole booth</b> also needs:
+          <ul>
+            <li>a close-talk wireless mic, a USB switch box, a lens shutter, a pen and a travel router: about €400-800;</li>
+            <li>an optional offline card printer;</li>
+            <li>a laptop, reused from SUT if possible (otherwise about €1,200-1,500).</li>
+          </ul>
+        </li>
+        <li>The TV is provided by the fair.</li>
+        <li>No NVIDIA GPU is required: everything, including the imagination, ran on the dev laptop's CPU and integrated GPU.</li>
+      </ul>
+      <p><b>Procurement risk:</b> the Pi 5 4 GB is backordered in Poland to about 13 Nov 2026 (the 8 GB is in stock). The PiDog ships from China with 23% import VAT. There are open GitHub issues about Robot HAT V5 reliability, hence the spare unit. Order soon after selection (28 Oct).</p>
+    </section>
+
+    <section id="architecture">
+      <h2>Architecture</h2>
+      <p>The robot is a thin, honest sensor node. All AI runs on the stand laptop, which is offline on a dedicated local router. Nothing goes to the cloud. A sensor that is switched off is stopped at the source.</p>
+      <figure><div class="frame"><img src="assets/architecture.png" alt="Architecture: robot sensors and a Raspberry Pi with a source-side gate stream over a local router to the stand laptop, which runs preprocessing, eyes and ears models, observations, evidence memory, fusion, representation and explanation, then drives the TV screen, the robot's voice and poses, and the optional imagination and printer. Nothing external." width="1600" height="1300"></div>
+      <figcaption>Where each part runs. The prototype measured 250-450 ms per camera frame and 2.3 s per spoken answer on a laptop CPU (Core Ultra 7 255U, no GPU).</figcaption></figure>
+      <p>We compared three options. <b>Mostly onboard</b> fails because a Pi 5 cannot run CLIP, Whisper and the generator together. <b>Hybrid with cloud</b> fails because children's data would leave the booth and it would depend on venue Wi-Fi. We chose <b>distributed local</b>.</p>
+    </section>
+
+    <section id="ethics">
+      <h2>Ethics and privacy</h2>
+      <p>The GDPR and the EU AI Act both apply at the fair: live processing is processing even without storage.</p>
+      <ul>
+        <li>The design avoids emotion inference (Art. 5(1)(f)) and any biometric categorisation (Art. 5(1)(g), Art. 50(3)).</li>
+        <li>The robot discloses that it is an AI in child-friendly words (Art. 50(1); robot pets are explicitly in scope), and generated images are machine-marked (Art. 50(2)).</li>
+        <li>Lawful basis: public task (SUT's science-dissemination duty), with the green "start" buttons as an ethical opt-in.</li>
+        <li>A short DPIA with the SUT Data Protection Officer before the fair. No research data is collected at the fair.</li>
+      </ul>
+      <ul class="never">
+        <li><b>Who you are</b>No face or voice recognition, no embeddings.</li>
+        <li><b>How you feel</b>No emotion inference.</li>
+        <li><b>Age or gender</b>Not estimated from face or voice.</li>
+        <li><b>Where you come from</b>No skin, hair or accent analysis.</li>
+        <li><b>Your health</b>Glasses tell it nothing else.</li>
+        <li><b>Headwear</b>Removed after review: it can reveal religion.</li>
+      </ul>
+      <p>Other controls:</p>
+      <ul>
+        <li>Sensors are off by default, with a physical lens shutter.</li>
+        <li>The camera only looks at the volunteer mat, and the screen shows a pixelated view.</li>
+        <li>Data is held in RAM only and the ledger is wiped per visitor. Nothing is written to disk.</li>
+        <li>The robot uses a closed vocabulary, and an adult is present.</li>
+        <li>There is no QR code and no email. The optional card has no photo and no name.</li>
+      </ul>
+    </section>
+
+    <section id="fit">
+      <h2>Why it fits Science is Wonderful</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Criterion</th><th>How we meet it</th></tr></thead>
+        <tbody>
+          <tr><td>Feasibility</td><td>The software already works end to end on a laptop, offline. The hardware is off the shelf and cheap, with a spare unit. If the robot fails, the activity falls back to a laptop camera and mic, or to paper "clue cards".</td></tr>
+          <tr><td>Suitability</td><td>A 15-minute group module with hands-on switches, predictions and "fool the robot" for ages 7-18. The interface is trilingual (FR/NL/EN) with pictograms.</td></tr>
+          <tr><td>Impact</td><td>Phones, games and smart speakers sense children every day. The booth shows what a machine can and cannot know, and that some guesses are off-limits.</td></tr>
+          <tr><td>Research at the core</td><td>Sensor fusion under failure and uncertainty (DC5) and faithful explanations (DC7) are exactly what the switches and "why" cards show.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="changes">
+      <h2>What we changed from the first idea, and why</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>First idea</th><th>Problem</th><th>Now</th></tr></thead>
+        <tbody>
+          <tr><td>3-5 min with one visitor</td><td>Groups of up to a whole class for 15 min</td><td>Group module with 2-3 volunteer rounds</td></tr>
+          <tr><td>AI-generated portrait of the visitor</td><td>Invents face, skin, age and gender; deep-fake and AI Act issues; not faithful</td><td>Procedural drawing where every element is one inferred answer; optional robot-mascot "imagination" made only from words</td></tr>
+          <tr><td>"Adult or child?", age, emotion</td><td>Biometric categorisation and emotion inference; inaccurate on children; legally risky</td><td>Observable, momentary signals plus answers the child chooses to give</td></tr>
+          <tr><td>Free conversation with an LLM</td><td>Unpredictable with children; explanations would not be faithful</td><td>Two scripted questions, closed word list, template explanations</td></tr>
+          <tr><td>Robot dog walking among children</td><td>Safety risk, servo wear, noise</td><td>Robot sits in a pen at child eye height and gestures</td></tr>
+          <tr><td>Microphone on the robot</td><td>Servo noise and an 80 dB hall; far-field ASR failed in our tests</td><td>Hand-held close-talk "dog-bone" mic, still the robot's ears</td></tr>
+          <tr><td>QR code or email delivery</td><td>Personal data leaves the booth</td><td>Nothing by default plus a "forget me" moment; optional offline card with no photo</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="next">
+      <h2>Decisions needed before Monday 5 October</h2>
+      <ol>
+        <li><b>Lead applicant</b> (Person 1): DC7 or DC5, and a <b>third team member</b>, ideally a French or Dutch speaker.</li>
+        <li><b>Supervisor approval</b> for 4 Nov 2026 (online workshop) and 16-19 Mar 2027 (in person), checked against secondments.</li>
+        <li><b>Funding line</b> for the robot part and booth extras (TUAI or SUT), and whether a laptop can be reused.</li>
+        <li>The lead records the <b>120-second video</b> of themselves (script in the application pack; the prototype video may appear as a short insert only).</li>
+        <li>Everyone rewrites the form texts in their own words. The call checks for a gap between AI-written proposals and delivery.</li>
+      </ol>
+      <p>After selection (28 Oct), the steps are:</p>
+      <ul>
+        <li>order the hardware;</li>
+        <li>connect the robot in November;</li>
+        <li>calibrate on consented adult recordings in December-January;</li>
+        <li>finish the DPIA, translations and a rehearsal at an SUT open day by February.</li>
+      </ul>
+    </section>
+
+    <section id="files">
+      <h2>Files in the project folder</h2>
+      <ul>
+        <li>Interactive demo: <a href="https://claude.ai/artifact/QtTQJbyT2cXppcQX7hR9Xf">open the exhibition screen</a> (6 visitors, all switches)</li>
+        <li><code>prototype/video/out/how_does_a_robot_see_you.mp4</code> and <code>storyboard.md</code>: demo video and its script</li>
+        <li><code>docs/08_siw_application_pack.md</code>: form-ready texts with measured lengths, video script, checklist</li>
+        <li><code>docs/02_architecture.md</code>, <code>03_hardware.md</code>, <code>04_methodology.md</code>, <code>06_exhibition_walkthrough.md</code>, <code>09_ethics_privacy.md</code></li>
+        <li><code>prototype/</code>: code, tests, experiments, the exhibition screen (<code>demo/</code>), live mode (<code>live/</code>), demo video renderer</li>
+        <li><code>research/01-10</code>: verified desk research with sources: call, robots, audio, vision, generative models, XAI, datasets, law, exhibition design</li>
+      </ul>
+    </section>
+
+    <footer>
+      Prototype data: Seamless Interaction (Meta, 2025, CC BY-NC 4.0, pixelated), Lombard GRID (CC BY 4.0), Open Images V7 (CC BY). Models: MediaPipe, OpenCLIP ViT-B/32, Silero VAD, faster-whisper, LCM-Dreamshaper (OpenVINO), Piper TTS. No children's data was used. Draft prepared with AI assistance for internal discussion; numbers come from the project's own experiment files.
+    </footer>
+  </main>
+</div>

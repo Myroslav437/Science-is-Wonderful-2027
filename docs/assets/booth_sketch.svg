@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" font-family="Segoe UI, Arial, sans-serif">
+  <rect width="1600" height="1000" fill="#f6f8fb"/>
+  <text x="60" y="62" font-size="34" font-weight="700" fill="#1f2430">How does a robot see you? - booth layout (top view, standard 4 x 2 m booth)</text>
+  <text x="60" y="98" font-size="20" fill="#5b6170">Scale: 1 m = 300 px. Fully offline. Robot stays on the table inside its pen (no walking among children).</text>
+
+  <!-- booth outline 4 m x 2 m => 1200 x 600 px -->
+  <g transform="translate(200,160)">
+    <rect x="0" y="0" width="1200" height="600" fill="#ffffff" stroke="#1f2430" stroke-width="6"/>
+    <text x="600" y="-14" text-anchor="middle" font-size="18" fill="#5b6170">back wall (light walls provided)</text>
+    <text x="-16" y="300" text-anchor="middle" font-size="18" fill="#5b6170" transform="rotate(-90 -16 300)">side wall</text>
+    <text x="1216" y="300" text-anchor="middle" font-size="18" fill="#5b6170" transform="rotate(90 1216 300)">side wall</text>
+    <text x="600" y="640" text-anchor="middle" font-size="18" fill="#5b6170">open front: visitors arrive here (groups up to a whole class)</text>
+
+    <!-- dimension marks -->
+    <line x1="0" y1="690" x2="1200" y2="690" stroke="#5b6170" stroke-width="2"/>
+    <line x1="0" y1="680" x2="0" y2="700" stroke="#5b6170" stroke-width="2"/><line x1="1200" y1="680" x2="1200" y2="700" stroke="#5b6170" stroke-width="2"/>
+    <text x="600" y="720" text-anchor="middle" font-size="20" fill="#1f2430">4 m</text>
+    <line x1="1260" y1="0" x2="1260" y2="600" stroke="#5b6170" stroke-width="2"/>
+    <line x1="1250" y1="0" x2="1270" y2="0" stroke="#5b6170" stroke-width="2"/><line x1="1250" y1="600" x2="1270" y2="600" stroke="#5b6170" stroke-width="2"/>
+    <text x="1290" y="306" font-size="20" fill="#1f2430">2 m</text>
+
+    <!-- TV on back wall -->
+    <rect x="420" y="10" width="360" height="34" rx="4" fill="#1f2430"/>
+    <text x="600" y="33" text-anchor="middle" font-size="17" fill="#ffffff">TV (provided): the robot's picture + "why?"</text>
+
+    <!-- low long table along back -->
+    <rect x="60" y="60" width="1080" height="150" rx="8" fill="#e9edf3" stroke="#9aa3b2" stroke-width="3"/>
+    <text x="80" y="88" font-size="17" fill="#5b6170">low long table (provided)</text>
+
+    <!-- laptop -->
+    <rect x="90" y="110" width="150" height="80" rx="6" fill="#ffffff" stroke="#1f2430" stroke-width="3"/>
+    <text x="165" y="146" text-anchor="middle" font-size="16" fill="#1f2430">laptop</text>
+    <text x="165" y="168" text-anchor="middle" font-size="13" fill="#5b6170">all AI runs here, offline</text>
+
+    <!-- router -->
+    <rect x="255" y="130" width="96" height="40" rx="5" fill="#ffffff" stroke="#9aa3b2" stroke-width="2"/>
+    <text x="303" y="155" text-anchor="middle" font-size="12" fill="#5b6170">5 GHz router</text>
+
+    <!-- robot pen -->
+    <rect x="510" y="98" width="180" height="102" rx="14" fill="#fff6ea" stroke="#f08a24" stroke-width="4" stroke-dasharray="10 6"/>
+    <g transform="translate(600,150)">
+      <ellipse cx="0" cy="8" rx="46" ry="22" fill="#cfd5df"/>
+      <rect x="-36" y="-14" width="72" height="34" rx="12" fill="#ffffff" stroke="#1f2430" stroke-width="3"/>
+      <circle cx="44" cy="-6" r="16" fill="#ffffff" stroke="#1f2430" stroke-width="3"/>
+      <circle cx="50" cy="-9" r="4" fill="#2f7de1"/>
+      <path d="M38 -22 l-6 -12 l10 4z" fill="#f08a24"/>
+    </g>
+    <text x="600" y="86" text-anchor="middle" font-size="15" fill="#1f2430">robot dog in its pen (camera at child eye height)</text>
+
+    <!-- switch panel at front of table -->
+    <rect x="710" y="160" width="230" height="44" rx="8" fill="#ffffff" stroke="#1f2430" stroke-width="3"/>
+    <circle cx="738" cy="182" r="14" fill="#2f7de1"/><circle cx="781" cy="182" r="14" fill="#f08a24"/>
+    <circle cx="824" cy="182" r="14" fill="#9aa3b2"/><circle cx="867" cy="182" r="14" fill="#5b6170"/><circle cx="910" cy="182" r="14" fill="#c8352b"/>
+    <text x="825" y="240" text-anchor="middle" font-size="15" fill="#1f2430">big switches: EYES, EARS, "foggy lens",</text>
+    <text x="825" y="258" text-anchor="middle" font-size="15" fill="#1f2430">"noisy room", STOP / forget me</text>
+
+    <!-- interaction mat -->
+    <rect x="450" y="290" width="300" height="200" rx="10" fill="#eef4fd" stroke="#2f7de1" stroke-width="4"/>
+    <text x="600" y="330" text-anchor="middle" font-size="19" font-weight="700" fill="#1f2430">volunteer mat (1 x 0.7 m)</text>
+    <text x="600" y="356" text-anchor="middle" font-size="15" fill="#5b6170">the only area the camera may use</text>
+    <circle cx="600" cy="420" r="26" fill="#ffffff" stroke="#1f2430" stroke-width="3"/>
+    <text x="600" y="476" text-anchor="middle" font-size="15" fill="#1f2430">volunteer + hand-held "dog-bone" mic</text>
+    <line x1="600" y1="290" x2="600" y2="205" stroke="#2f7de1" stroke-width="2" stroke-dasharray="6 6"/>
+
+    <!-- group area -->
+    <path d="M150 560 Q600 420 1050 560" fill="none" stroke="#9aa3b2" stroke-width="3" stroke-dasharray="4 8"/>
+    <g fill="#ffffff" stroke="#5b6170" stroke-width="2">
+      <circle cx="200" cy="540" r="16"/><circle cx="270" cy="522" r="16"/><circle cx="340" cy="508" r="16"/>
+      <circle cx="860" cy="508" r="16"/><circle cx="930" cy="522" r="16"/><circle cx="1000" cy="540" r="16"/>
+    </g>
+    <text x="230" y="590" font-size="15" fill="#5b6170">group watches, predicts, votes with cards</text>
+    <text x="840" y="590" font-size="15" fill="#5b6170">and takes turns on the switches</text>
+
+    <!-- staff -->
+    <circle cx="120" cy="290" r="18" fill="#1f2430"/><text x="120" y="330" text-anchor="middle" font-size="14" fill="#1f2430">researcher</text>
+    <circle cx="1080" cy="290" r="18" fill="#1f2430"/><text x="1080" y="330" text-anchor="middle" font-size="14" fill="#1f2430">researcher</text>
+
+    <!-- privacy sign -->
+    <rect x="1110" y="420" width="80" height="120" rx="6" fill="#fff" stroke="#1f2430" stroke-width="3"/>
+    <text x="1150" y="455" text-anchor="middle" font-size="13" fill="#1f2430">privacy</text>
+    <text x="1150" y="473" text-anchor="middle" font-size="13" fill="#1f2430">sign</text>
+    <text x="1150" y="491" text-anchor="middle" font-size="12" fill="#5b6170">EN/FR/NL</text>
+  </g>
+
+  <text x="60" y="960" font-size="18" fill="#5b6170">Power needed: 4 sockets at the table (laptop, robot power supply, router, 1 spare). No venue Wi-Fi or internet needed. Nothing is recorded or stored.</text>
+</svg>
